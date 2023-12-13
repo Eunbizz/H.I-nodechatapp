@@ -3,7 +3,7 @@ const fs = require('fs').promises;
 const path = require('path');
 const router = express.Router();
 
-const MEMBERS_FILE = path.join(__dirname, '../DB/members.json'); // Correct path
+const MEMBERS_FILE = path.join(__dirname, '../DB/members.json');
 
 async function getMembersData() {
     const data = await fs.readFile(MEMBERS_FILE, 'utf8');
