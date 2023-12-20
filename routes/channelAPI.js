@@ -1,128 +1,152 @@
-/* 
-- 채팅방(채널) 데이터를 관리하는 RESTFul 라우터 파일
-- 해당 라우터파일 기본주소 경로: http://localhost:3000/api/channelAPI~
-- 채팅방 생성 웹피이지, 목록 페이지, 수정 페이지에 대한 웹페이지 요청 및 응답 처리담당
-*/
-var express = require('express');
-var router = express.Router();
+const express = require("express");
+const fs = require("fs").promises;
+const router = express.Router();
+const path = require("path");
 
+const CHANNELS_FILE = path.join(__dirname, "../DB/channels.json");
 
-// DB에 저장된 모든 채널목록 데이터를 제공하는 RESTAPI 라우팅 메소드
-// http://localhost:3000/api/channel/all
-router.get('/all', async(req, res, next)=> {
+async function getChannelsData() {
+  const data = await fs.readFile(CHANNELS_FILE, "utf8");
+  return JSON.parse(data);
+}
 
-    // DB에서 채널목록 정보를 모두 조회해왔다고 가정한다.   
-    var channelList = [
-        {
-            channelIdx: 1,
-            title: "1번째 채팅방 입니다.",
-            contents: "1번째 채팅방 내용입니다.",
-            view_cnt: 100,
-            display: "Y",
-            ipaddress: "111.111.111.111",
-            registDate: Date.now(),
-            registMemberId: "robin",
-        },
-        {
-            channelIdx: 2,
-            title: "2번째 채팅방 입니다.",
-            contents: "2번째 채팅방 내용입니다.",
-            view_cnt: 200,
-            display: "Y",
-            ipaddress: "222,111,111,111",
-            registDate: Date.now(),
-            registMemberId: "robin",
-        },
-    ]
-
-    // res.json(JSON데이터);
-    res.json(channelList);
+router.get("/all", async (req, res) => {
+  try {
+    const channels = await getChannelsData();
+    res.json(channels);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error retrieving channels", error: error });
+  }
 });
 
+router.post("/create", async (req, res) => {
+  var community_id = req.body.community_id;
+  var channel_id = req.body.channel_id;
+  var name = req.body.name;
+  var info = req.body.info;
+  var room_size = req.body.room_size;
+  var img_path = req.body.img_path;
+  var state_code = req.body.state_code;
+  var reg_date = req.body.reg_date;
+  var reg_id = req.body.reg_id;
+  var edit_date = req.body.edit_date;
+  var edit_id = req.body.edit_id;
 
-
-// 단일 채널정보를 조회하는 RESTAPI 라우팅 메소드 + 쿼리스트링방식
-// http://localhost:3000/api/channel?cid=1
-router.get('/', async(req, res, next)=> {
-
-    // STEP1: URL에서 채널 고유번호를 추출한다.
-    var channelId = req.query.cid;
-
-
-    // SPEP2: 추출된 채널고유번호를 이용해 DB의 채널테이블에서 해당 번호와 동일한 단일건의 채널정보를 조회해온다.
-    var channel = {
-        channelIdx: 1,
-        title: "1째 채팅방 입니다.",
-        contents: "1번째 채팅방 내용입니다.",
-        view_cnt: 200,
-        display: "Y",
-        ipaddress: "111.111.111.111",
-        registDate: Date.now(),
-        registMemberId: "robin",
-    };
-
-    // res.json(JSON데이터);
-    res.json(channel);
+  var channel = {
+    community_id,
+    channel_id,
+    name,
+    info,
+    room_size,
+    img_path,
+    state_code,
+    reg_date,
+    reg_id,
+    edit_date,
+    edit_id,
+  };
+  try {
+    const channels = await getChannelsData();
+    channels.push(channel);
+    await fs.writeFile(
+      CHANNELS_FILE,
+      JSON.stringify(channels, null, 2),
+      "utf8"
+    );
+    res.json({ message: "Channel created successfully", channel: channel });
+  } catch (error) {
+    res.status(500).json({ message: "Error saving the member", error: error });
+  }
 });
 
+router.post("/modify", async (req, res) => {
+  var community_id = req.body.community_id;
+  var channel_id = req.body.channel_id;
+  var name = req.body.name;
+  var info = req.body.info;
+  var room_size = req.body.room_size;
+  var img_path = req.body.img_path;
+  var state_code = req.body.state_code;
+  var reg_date = req.body.reg_date;
+  var reg_id = req.body.reg_id;
+  var edit_date = req.body.edit_date;
+  var edit_id = req.body.edit_id;
 
+  try {
+    let channels = await getChannelsData();
+    let channel = channels.find((c) => c.channel_id === channel_id);
 
-// 채널정보를 신규 등록하는 RESTAPI 라우팅메소드
-// http://localhost:3000/api/channel/create
-router.post('/create', async(req, res)=> {
+    if (channel) {
+      channel.community_id = community_id;
+      channel.name = name;
+      channel.info = info;
+      channel.room_size = room_size;
+      channel.img_path = img_path;
+      channel.state_code = state_code;
+      channel.reg_date = reg_date;
+      channel.reg_id = reg_id;
+      channel.edit_date = edit_date;
+      channel.edit_id = edit_id;
 
-    var channelName = req.body.channel_name;
-    var channelDescription = req.body.channel_desc;
-
-
-    var channel = {
-        channel_name:channelName,
-        channel_desc:channelDescription
+      await fs.writeFile(
+        CHANNELS_FILE,
+        JSON.stringify(channels, null, 2),
+        "utf8"
+      );
+      res.json({ message: "Channel modified successfully", channel: channel });
+    } else {
+      res.status(404).json({ message: "Channel not found" });
     }
-
-
-    res.json(channel)
-})
-
-
-
-
-// 기존 채널정보 데이터 수정하는 RESTAPI 라우팅메소드
-// http://localhost:3000/api/channel/modify
-router.post('/modify', async(req, res)=> {
-
-})
-
-
-
-// 기존 채널정보 데이터 삭제하는 RESTAPI 라우팅메소드
-// http://localhost:3000/api/channel/delete
-router.post('/delete', async(req, res)=> {
-
-})
-
-
-
-
-
-// 단일 채널정보를 조회하는 RESTAPI 라우팅 메소드-파라메터방식-와일드카드정의방식
-// 파라메터방식/와일드카드 방식으로 정의된 라우팅 메소드는 라우터파일의 최단에 배치
-
-// http://localhost:3000/api/channel/1
-router.get('/:id', async(req, res, next)=> {
-
-    var channelId = req.params.id;
-
-
-    var channel = {
-        channel_id:1, 
-        channel_name:"채널1"
-    };
-
-    // res.json(JSON데이터);
-    res.json(channel);
+  } catch (error) {
+    res.status(500).json({ message: "Error saving the channel", error: error });
+  }
 });
 
+router.post("/delete", async (req, res) => {
+  var channel_id = req.body.channel_id;
 
+  try {
+    let channels = await getChannelsData();
+
+    const index = channels.findIndex((c) => c.channel_id === channel_id);
+
+    if (index !== -1) {
+      channels.splice(index, 1);
+      await fs.writeFile(
+        CHANNELS_FILE,
+        JSON.stringify(channels, null, 2),
+        "utf8"
+      );
+
+      res.json({ message: "Channel deleted successfully" });
+    } else {
+      res.status(404).json({ message: "Channel not found" });
+    }
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error deleting the channel", error: error });
+  }
+});
+
+router.get("/:cid", async (req, res) => {
+  try {
+    const channelId = parseInt(req.params.cid, 10);
+    const channels = await getChannelsData();
+    const channel = channels.find((c) => c.channel_id === channelId);
+
+    if (channel) {
+      res.json(channel);
+    } else {
+      res.status(404).json({ message: "Channel not found" });
+    }
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error retrieving the channel", error: error });
+  }
+});
 
 module.exports = router;
