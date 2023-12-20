@@ -1,55 +1,30 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>Login</title>
-        <link rel="stylesheet" href="/styles/login.css">
-        <script src="../lib/jquery-3.6.0.min.js"></script>
-    </head>
-
-    <body>
-        <section class="login-form">
-            <h1>Login</h1>
-            <form action='/login' method='POST'>
-                <div class="int-area">
-                    <input type="text" name="email" id="email" autocomplete="off" required>
-                    <label for="email">USER EMAIL</label>
+    <!-- 로그인 세션 -->
+    <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
+        <div class="login-wrapper">
+            <form action="/" method="post">
+                <div class="login-screen">
+                    <div class="login-body">
+                        <a href="/chat/index" class="login-logo">
+                            <img src="img/logo.svg" alt="Quick Chat">
+                        </a>
+                        <h6>Welcome back,<br>Please login to your account.</h6>
+                        <div class="field-wrapper">
+                            <input type="email" name="email" autofocus>
+                            <div class="field-placeholder">Email ID</div>
+                        </div>
+                        <div class="field-wrapper mb-3">
+                            <input type="password" name="member_password">
+                            <div class="field-placeholder">Password</div>
+                        </div>
+                        <div class="actions">
+                            <a href="/find">비밀번호 찾기</a>
+                            <button type="submit" class="btn btn-primary">Login</button>
+                        </div>
+                    </div>
+                    <div class="login-footer">
+                        <span class="additional-link">No Account? <a href="/entry" class="btn btn-secondary">Sign Up</a></span>
+                    </div>
                 </div>
-                <div class="int-area">
-                    <input type="password" name="pw" id="pw" autocomplete="off" required>
-                    <label for="pw">PASSWORD</label>
-                </div>
-                <div class="btn-area">
-                    <button id="btn" type="submit">LOGIN</button>
-                </div>
-            <form>
-                <div class="caption">
-                    <a href="/find">Forgot Password?</a>
-                    <a href="/entry">Entry</a>
-                </div>
-
             </form>
-            </form>
-        </section>
-
-        <script>
-            let email = $('#email');
-            let pw = $('#pw');
-        let btn = $('#btn');
-        
-        $(btn).on('click', function() {
-            if($(email).val() == "") {
-                $(email).next('label').addClass('warning');
-                setTimeout(function() {
-                    $('label').removeClass('warning');
-                }, 1500);
-            }
-            else if($(pw).val() == "") {
-                $(pw).next('label').addClass('warning');
-                setTimeout(function() {
-                    $('label').removeClass('warning');
-                }, 1500);
-            }
-        });
-        </script>
-    </body>
-</html>
+        </div>
+    </div>
