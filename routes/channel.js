@@ -5,7 +5,7 @@ var router = express.Router();
 
 // 채팅 웹페이지 정보관리 라우팅
 router.get('/', async(req, res)=>{
-    res.render('chat/index.ejs')
+    res.render('chat/index', {layout:false});
 });
 
 module.exports = router;
