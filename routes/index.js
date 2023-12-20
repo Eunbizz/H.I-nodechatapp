@@ -23,7 +23,7 @@ router.post('/', async(req, res)=>{
     member_password: password
   };
 
-  res.redirect('/chat', { layout: false })
+  res.redirect('/chat');
 });
 
 
@@ -56,5 +56,6 @@ router.post('/find', async(req, res)=>{
   
   res.redirect('/')
 });
+
 
 module.exports = router;
