@@ -84,6 +84,7 @@ router.post('/find', async(req, res)=>{
   try {
     var email = req.body.email;
 
+    // DB admin 테이블에서 동일한 메일주소의 단일사용자 정보를 조회한다.
     var member = await db.Member.findOne({ where: { email: email } });
 
     var resultMsg = '';
@@ -103,3 +104,6 @@ router.post('/find', async(req, res)=>{
     console.error(error);
     res.status(500).send('Internal Server Error');
 }
+});
+
+module.exports = router;
