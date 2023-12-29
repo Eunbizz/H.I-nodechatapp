@@ -12,9 +12,9 @@ router.get('/login', async(req, res)=>{
 });
 
 // 로그인 처리 요청 및 응답, 로그인 완료 후 채팅 페이지 이동
-router.post('/login', async(req, res)=>{
+router.post('/', async(req, res)=>{
   var email = req.body.email;
-  var password = req.body.password;
+  var password = req.body.member_password;
 
   login = {
     email,
@@ -40,9 +40,11 @@ router.post('/login', async(req, res)=>{
   }
 });
 
+
+
 // 회원가입 웹페이지 요청 및 응답
 router.get('/entry', async(req, res)=>{
-  res.render('entry.ejs')
+  res.render('entry.ejs', {layout:"authLayout"})
 });
 
 // 회원가입 처리 요청 및 응답, 회원가입 완료 후 로그인 페이지 이동
@@ -82,7 +84,6 @@ router.post('/find', async(req, res)=>{
   try {
     var email = req.body.email;
 
-    // DB admin 테이블에서 동일한 메일주소의 단일사용자 정보를 조회한다.
     var member = await db.Member.findOne({ where: { email: email } });
 
     var resultMsg = '';
@@ -102,6 +103,3 @@ router.post('/find', async(req, res)=>{
     console.error(error);
     res.status(500).send('Internal Server Error');
 }
-});
-
-module.exports = router;

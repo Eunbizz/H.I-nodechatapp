@@ -3,6 +3,7 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+var expressLayouts = require('express-ejs-layouts');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -21,6 +22,18 @@ sequelize.sync();
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
+
+app.set('layout', 'layout');
+app.set("layout extractScripts", true); 
+app.set("layout extractStyles", true); 
+app.set("layout extractMetas", true); 
+
+// 로그인, 회원가입, 비밀번호찾기 레이아웃
+app.set('authLayout', 'authLayout');
+app.set("authLayout extractScripts", true); 
+app.set("authLayout extractStyles", true); 
+app.set("authLayout extractMetas", true); 
+app.use(expressLayouts);
 
 
 app.use(logger('dev'));
