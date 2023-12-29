@@ -74,36 +74,36 @@ router.post('/entry', async(req, res)=>{
   res.redirect('/login')
 });
 
-// 암호 찾기 웹페이지 요청 및 응답
-router.get('/find', async(req, res)=>{
-  res.render('find.ejs',{resultMsg:""})
+/* 암호찾기 웹페이지 요청과 응답 */
+router.get('/find', async(req, res, next)=>{
+  res.render('find', {msg:"", email:"", layout:"authLayout"});
 });
 
-// 암호찾기 처리 요청 및 응답,암호 찾기 완료 후 로그인 페이지 이동
-router.post('/find', async(req, res)=>{
+/* 암호찾기 사용자 입력정보 처리 요청과 응답 */
+router.post('/find', async (req, res, next) => {
   try {
-    var email = req.body.email;
+    var Email = req.body.email;
 
-    // DB admin 테이블에서 동일한 메일주소의 단일사용자 정보를 조회한다.
-    var member = await db.Member.findOne({ where: { email: email } });
+    // DB에서 찾기
+    var email = await db.Member.findOne({ where: { email: Email } });
 
-    var resultMsg = '';
+    var msg = '';
 
-    if (member == null) {
-        resultMsg = '등록되지 않은 이메일 입니다.';
-    } else {
-        if (member.email == email) {
-            resultMsg = member.member_password
-        }
+    if (!email || email.email !== Email) {
+      msg = '등록된 메일이 없습니다. 가입 후 이용 바랍니다.';
+
+    } else if (email.email == Email) {
+      msg = '메일찾기완료';
     }
 
-    if (resultMsg !== '') {
-        res.render('find', { resultMsg, email, layout: "authLayout" })
+    if (msg !== '') {
+      res.render('find', { msg, email, layout: "authLayout" })
     }
-} catch (error) {
-    console.error(error);
+
+  } catch (err) {
+    console.error(err);
     res.status(500).send('Internal Server Error');
-}
+  }
 });
 
 module.exports = router;
