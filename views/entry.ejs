@@ -7,30 +7,47 @@
 						<a href="/" class="login-logo">
 							<img src="img/logo.svg" alt="Quick Chat">
 						</a>
-						<h6>Welcome to Quick Chat App,<br>Create your account.</h6>
-						<div class="field-wrapper">
-							<input type="email" name="email" id="email" autofocus>
+						<h6>Hola to you,<br>Create your account.</h6>
+						<div class="field-wrapper mb-3 d-flex">
 							<div class="field-placeholder">Email ID</div>
+							<input type="email" name="email" id="email" class="form-control" autofocus autocomplete="email">
+							<button type="button" id="checkEmail" class="btn btn-secondary ml-2">Check</button>
 						</div>
-						<div class="field-wrapper">
-							<input type="password" name="member_password" id="member_password" >
+						<div class="field-wrapper mb-3">
+							<input type="text" name="name" id="name" autocomplete="name">
+							<div class="field-placeholder">Name</div>
+						</div>
+						<div class="field-wrapper mb-3">
+							<input type="password" name="password" id="password" >
 							<div class="field-placeholder">Password</div>
 						</div>
 						<div class="field-wrapper mb-3">
-							<input type="password" name="Confirm_member_password" id="Confirm_member_password">
+							<input type="password" name="confirm_password" id="confirm_password">
 							<div class="field-placeholder">Confirm Password</div>
+						</div>
+						<div class="field-wrapper mb-3">
+							<select name="country_code" id="country_code">
+								<option value="">Choose</option>
+								<option value="KR">Korea</option>
+								<option value="US">United States</option>
+								<option value="UK">United Kingdom</option>
+								<option value="JP">Japan</option>
+							</select>
+							<div class="field-placeholder">Country</div>
 						</div>
 						<div class="field-wrapper mb-3">
 							<input type="tel" name="telephone" id="telephone">
 							<div class="field-placeholder">Phone</div>
 						</div>
 						<div class="field-wrapper mb-3">
-							<input type="date" name="entry_type_code" id="entry_type_code">
+							<input type="date" name="birthDate" id="birthDate">
 							<div class="field-placeholder">Birthday</div>
 						</div>
-						<div class="actions">
-							<button type="submit" class="btn btn-primary ml-auto">Sign Up</button>
+						<div class="field-wrapper mb-3">
+							<input type="file" name="profileImgPath" id="profileImgPath">
+							<div class="field-placeholder">Profile Image
 						</div>
+
 					</div>
 					<div class="login-footer">
 						<span class="additional-link">Have an account? <a href="/" class="btn btn-secondary">Login</a></span>
@@ -39,3 +56,19 @@
 			</form>
 		</div>
 	</div>
+
+	<script>
+		document.getElementById('country_code').addEventListener('change', function() {
+			var countryCodes = {
+				'KR': '+82',
+				'US': '+1',
+				'UK': '+44',
+				'JP': '+81'
+			};
+			var countryCode = this.value;
+			var phoneInput = document.getElementById('telephone');
+	
+			phoneInput.value = countryCodes[countryCode] ? countryCodes[countryCode] : '';
+		});
+	</script>
+	
