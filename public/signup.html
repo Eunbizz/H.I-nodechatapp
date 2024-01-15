@@ -54,24 +54,34 @@
 				</div>
 				<div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
 					<div class="login-wrapper">
-						<form action="index.html">
+						<form id="entryForm">
 							<div class="login-screen">
 								<div class="login-body">
 									<a href="index.html" class="login-logo">
 										<img src="img/logo.svg" alt="Quick Chat">
 									</a>
 									<h6>Welcome to Quick Chat App,<br>Create your account.</h6>
-									<div class="field-wrapper">
-										<input type="email" autofocus>
+									<div class="field-wrapper d-flex">
+										<input type="email"  name="email" id="email" autofocus>
 										<div class="field-placeholder">Email ID</div>
+										<button type="button" id="checkEmail" class="btn btn-secondary ml-2">Check</button>
 									</div>
+									<p id="email_message" style="color: red; margin-bottom:2vh;"></p>
 									<div class="field-wrapper">
-										<input type="password">
+										<input type="password"  name="member_password" id="member_password">
 										<div class="field-placeholder">Password</div>
 									</div>
-									<div class="field-wrapper mb-3">
-										<input type="password">
+									<div class="field-wrapper">
+										<input type="password"  name="confirm_password" id="confirm_password">
 										<div class="field-placeholder">Confirm Password</div>
+									</div>
+									<div class="field-wrapper">
+										<input type="text" name="name" id="name">
+										<div class="field-placeholder">Name</div>
+									</div>
+									<div class="field-wrapper mb-3">
+										<input type="tel" name="telephone" id="telephone">
+										<div class="field-placeholder">Phone</div>
 									</div>
 									<div class="actions">
 										<button type="submit" class="btn btn-primary ml-auto">Sign Up</button>
@@ -86,11 +96,75 @@
 				</div>
 			</div>
 			<!-- Row end -->
-
 		</div>
-		<!-- *************
-			************ Login container end *************
-		************* -->
+
+		<script src="/js/jquery.min.js"></script>
+
+		<script>
+
+			// 이메일 중복체크
+			$("#checkEmail").click(function(){
+				$.ajax({
+					url: "/checkEmail",
+					type: "post",
+					data: {
+						email: $("#email").val()
+					},
+					success: function(data){
+						if(data.resultMsg == 'exist'){
+							document.getElementById('email_message').innerText = "이미 가입된 이메일입니다.";
+							$("#email").val("");
+							$("#email").focus();
+						}else if (data.resultMsg == 'empty'){
+							document.getElementById('email_message').innerText = "이메일을 입력해주세요.";
+							document.getElementById('email_message').style.color = "red";
+							$("#email").focus();
+						}else{
+							document.getElementById('email_message').innerText = "사용가능한 이메일입니다.";
+							document.getElementById('email_message').style.color = "blue";
+						}
+					}
+				});
+			});
+
+			// entryForm폼안에 submit 이벤트가 발생하면
+			$("#entryForm").submit(function() {
+				// 만약 이메일이 비어있으면
+				if($("#email").val()=="") {
+					document.getElementById('email_message').innerText = "메일주소를 입력해주세요.";
+					$("#email").focus();
+					return false;
+				}
+				// member객체 생성
+				// input의 value값들을 담는다.
+				var member = {
+					"email": $("#email").val(),
+					"member_password": $("#member_password").val(),
+					"name": $("#name").val(),
+					"telephone": $("#telephone").val(),
+				};
+
+				$.post('/api/member/entry', member).done(function(result) {
+					// code값이 200이면 회원가입 완료 후 login.html 페이지로 이동
+					if(result.code == 200) {
+						alert("회원가입완료");
+						location.href="/login.html";
+					//  result.code == 400 이거나 500이면 회원가입 실패
+					} else if(result.code == 400 || result.code == 500 ) {
+						alert("회원가입실패");
+					//  result.code == 500 이고 msg가 ExistDoubleEamil이면 동일메일주소 존재
+					} else if(result.code == 500 && result.msg == "ExistDoubleEamil") {
+						alert("동일한 메일주소가 존재합니다.")
+					} else {
+					// 그 외에는 회원가입실패
+						alert("회원가입실패");
+					}
+				});
+				return false;
+			});
+
+
+		</script>
 
 	</body>
 </html>

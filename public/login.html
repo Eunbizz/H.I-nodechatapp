@@ -54,7 +54,7 @@
 				</div>
 				<div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
 					<div class="login-wrapper">
-						<form action="index.html">
+						<form id="loginForm">
 							<div class="login-screen">
 								<div class="login-body">
 									<a href="index.html" class="login-logo">
@@ -62,11 +62,11 @@
 									</a>
 									<h6>Welcome back,<br>Please login to your account.</h6>
 									<div class="field-wrapper">
-										<input type="email" autofocus>
+										<input type="email" id="email" name="email" autofocus>
 										<div class="field-placeholder">Email ID</div>
 									</div>
 									<div class="field-wrapper mb-3">
-										<input type="password">
+										<input type="password" id="password" name="password">
 										<div class="field-placeholder">Password</div>
 									</div>
 									<div class="actions">
@@ -85,9 +85,60 @@
 			<!-- Row end -->
 
 		</div>
-		<!-- *************
-			************ Login container end *************
-		************* -->
+
+		<script src="js/jquery.min.js"></script>
+
+		<script>
+
+			$("#loginForm").submit(function(){
+				if ($("#email").val() == ""){
+					alert('메일주소를 입력해주세요.')
+					$("#email").focus();
+					return false;
+				};
+
+				var member = {
+					"email":$("#email").val(),
+					"password":$("#password").val(),
+				}
+
+				// 백엔드 로그인 api
+				$.ajax({
+					url:"/api/member/login",
+					type:"POST",
+					data:member,
+					success:function(result){
+						console.log("회원로그인 결과값 확인:",result);
+
+						if(result.code == 200){
+
+							// 내장객체 localStorage.setItem("키값",JWT토큰값)
+							localStorage.setItem("userauthtoken",result.data);
+
+							location.href= "/index.html";
+
+						}else if(result.code == 400){
+
+							if(result.msg == "NotExistEmail"){
+								alert("동일한 메일주소가 존재하지 않습니다.");
+								return false;
+							}
+
+							if(result.msg == "NotCorrectword"){
+								alert("암호가 존재하지 않습니다.");
+								return false;
+							}
+
+						}else{
+							alert("로그인 실패");
+						}
+
+					}
+				});
+
+				return false
+			});
+		</script>
 
 	</body>
 </html>
