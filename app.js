@@ -6,7 +6,6 @@ var logger = require('morgan');
 require("dotenv").config();
 const cors = require("cors");
 var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
 var memberAPIRouter = require('./routes/memberAPI');
 var channelRouter = require('./routes/channel');
 
@@ -40,7 +39,6 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
 app.use('/api/member', memberAPIRouter);
 app.use('/chat', channelRouter);
 app.use('/api/channel', channelAPIRouter);
