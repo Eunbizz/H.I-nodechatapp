@@ -3,7 +3,7 @@
 
 var express = require('express');
 var router = express.Router();
-var byctrpt = require("bcryptjs");
+var bcrypt = require("bcryptjs");
 var AES = require("mysql-aes");
 var db = require("../models/index.js");
 var jwt = require("jsonwebtoken");
@@ -22,6 +22,7 @@ router.get('/all', async(req, res, next)=>{
         res.json({ message: "Member not find", error: error });
     }
 });
+
 // 로그인 api
 router.post('/login', async (req, res, next) => {
     var apiResult = {
@@ -119,11 +120,13 @@ router.post('/entry', async(req, res, next)=>{
                 member_password: bcryptedPassword,
                 name: name,
                 telephone: encryptTelephone,
+                profile_img_path:"",
                 entry_type_code: 1,
                 use_state_code: 1,
                 reg_date: Date.now(),
                 reg_member_id: 1,
-                edit_date: Date.now()
+                edit_date: Date.now(),
+                edit_member_id: 1
             };
 
             var regMember = await db.Member.create(member);
@@ -137,7 +140,7 @@ router.post('/entry', async(req, res, next)=>{
             apiResult.msg = "ok";
         }
     }catch(error) {
-        console.log("서버에러발생-/api/member/entry", error.meesage);
+        console.log("서버에러발생-/api/member/entry", error.message);
         apiResult.code = 500;
         apiResult.data = null;
         apiResult.msg = "Failed";
@@ -300,16 +303,16 @@ router.post('/paaword/update', tokenAuthCheck, async(req, res) =>{
         if(!member) throw new Error("존재하지 않는 회원입니다.");
 
         // DB 비밀번호와 입력한 현재 비밀번호가 같은지 확인
-        var cur_pwd = byctrpt.hashSync(req.body.cur_pwd, 12);
-        var isPasswordMatch = await byctrpt.compare(cur_pwd, member.member_password);
+        var cur_pwd = bcrypt.hashSync(req.body.cur_pwd, 12);
+        var isPasswordMatch = await bcrypt.compare(cur_pwd, member.member_password);
         if (!isPasswordMatch) {
             apiResult.code = 500;
             apiResult.data = null;
             apiResult.msg = "비밀번호가 일치하지 않습니다.";
         }
         else{
-            var new_pwd = byctrpt.hashSync(req.body.new_pwd, 12);
-            var isPasswordMatch = await byctrpt.compare(new_pwd, member.member_password);
+            var new_pwd = bcrypt.hashSync(req.body.new_pwd, 12);
+            var isPasswordMatch = await bcrypt.compare(new_pwd, member.member_password);
             // 비밀번호 변경 입력값과 이전 비밀번호가 일치하는지 확인
             if (isPasswordMatch) {
                 apiResult.code = 500;
@@ -317,8 +320,8 @@ router.post('/paaword/update', tokenAuthCheck, async(req, res) =>{
                 apiResult.msg = "비밀번호가 이전과 동일합니다.";
             }else{
                 // 비밀번호 확인 입력값과 일치하는지 확인
-                var confirm_pwd = byctrpt.hashSync(req.body.conform_pwd, 12);
-                var isPasswordMatch = await byctrpt.compare(confirm_pwd, new_pwd);
+                var confirm_pwd = bcrypt.hashSync(req.body.conform_pwd, 12);
+                var isPasswordMatch = await bcrypt.compare(confirm_pwd, new_pwd);
                 if (!isPasswordMatch) {
                     apiResult.code = 500;
                     apiResult.data = null;

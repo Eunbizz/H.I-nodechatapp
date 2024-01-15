@@ -23,7 +23,7 @@ module.exports = function(sequelize, DataTypes) {
             allowNull:true,
             comment:'이미지경로'},
         telephone:{
-            type:DataTypes.STRING(20),
+            type:DataTypes.STRING(100),
             allowNull:true,
             comment:'전화번호'},
         entry_type_code:{

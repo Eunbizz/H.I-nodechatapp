@@ -11,6 +11,7 @@ var memberAPIRouter = require('./routes/memberAPI');
 var channelRouter = require('./routes/channel');
 var channelAPIRouter = require('./routes/channelAPI');
 var sequelize = require('./models/index.js').sequelize;
+var commonAPIRouter = require('./routes/commonAPI');
 
 var app = express();
 
