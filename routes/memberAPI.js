@@ -4,6 +4,9 @@
 var express = require('express');
 var router = express.Router();
 
+// jsonwebtoken 참조
+const jwt = require('jsonwebtoken');
+
 var Member = require('../models/member');
 
 // Get all members
@@ -19,27 +22,103 @@ router.get('/all', async(req, res, next)=>{
 
 
 router.post('/login', async (req, res, next) => {
+
+    var apiResult = {
+        code: 400,
+        data: {},
+        msg: "",
+     };
+
     const { email, password } = req.body;
 
     try {
-        const user = await db.Member.findOne({ where: { email } });
+        const member = await db.Member.findOne({ where: { email } });
 
-        if (!user) {
-            return res.json({ message: "이메일이나 비밀번호가 올바르지 않습니다." });
+        if (!member) {
+            apiResult.code = 400;
+            apiResult.data = "notExistEmail";
+            apiResult.msg = "동일한 메일주소가 존재하지 않습니다.";
+            return res.json(apiResult);
         }
 
-        if (password === user.member_password) {
-            // 로그인 성공
-            res.json({ message: "로그인 성공", user });
-        } else {
+        if (password != user.member_password) {
             // 비밀번호 불일치
-            res.json({ message: "이메일이나 비밀번호가 올바르지 않습니다." });
+            apiResult.code = 400;
+            apiResult.data = null;
+            apiResult.msg = "이메일이나 비밀번호가 올바르지 않습니다.";
+
+            res.json(apiResult.msg);
         }
+
+        // 사용자 정보 중 중요 정보를 JWT 토큰으로 생성
+        var tokenJsonData = {
+            member_id:member.member_id,
+            email:member.email,
+            name:member.name,
+            profile_img_path:member.profile_img_path,
+            telephone:member.telephone
+        };
+
+        // 사용자 정보를 담고있는 JWT 사용자 인증토큰 생성
+        const token = jwt.sign(tokenJsonData, process.env.JWT_SECRET,
+            {expriresIn:'24h', issuer:'eunbi'});
+
+        apiResult.code = 200;
+        apiResult.data = token;
+        apiResult.msg = "OK";
 
     } catch (error) {
-        console.log(error);
-        res.json({ message: "Member not Login", error });
+        apiResult.code = 500;
+        apiResult.data = null;
+        apiResult.msg = "서버에러";
     }
+    res.json(apiResult);
+});
+
+// 로그인 완료한 사용자 개인 프로필 정보 조회 API
+// 반드시 로그인시 러버에서 발급해준 JWT 토큰값이 전달되어야 함
+// localhost:3000/api/member/profile
+router.get('/profile', async(req,res)=>{
+
+    var apiResult = {
+        code:"",
+        data:{},
+        msg:""
+    };
+
+    try{
+        // 현재 profile api를 호출하는 사용자 요청 http header 영역에서
+        // Authorization의 JWT 토큰값 존재여부 확인 및 추출
+        const token = req.headers.authorization.split('Bearer ')[1];
+
+        // JWT 토큰이 전달되지 않았을 경우
+        if (token==undefined){
+            apiResult.code = 400;
+            apiResult.data = "notprovidetoken";
+            apiResult.msg = "인증토큰이 제공되지 않았습니다.";
+
+            return res.json(apiResult.msg); // 반환되며 에러 발생하지 않음 (프로세스 중단)
+        }
+
+        // 제공된 JWT 토큰에서 사용자 메일주소 추출
+        var tokenMember = jwt.verify(token, process.env.JWT_SECRET);
+
+        // 토큰에 저장된 메일주소로 db에서 사용자 정보 조회
+        var member = await db.Member.findOne({where:{email:tokenMember.email}});
+
+        // 중요 개인정보는 프론트엔드에 제공 시 초기화하여 전달 
+        member.member_password = "";
+
+        apiResult.code = 200;
+        apiResult.data = member;
+        apiResult.msg = "Ok";
+
+    } catch(err){
+        apiResult.code = 500;
+        apiResult.data = null;
+        apiResult.msg = "failed";
+    }
+    res.json(apiResult);
 });
 
 // Create a new member
