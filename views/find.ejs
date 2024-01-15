@@ -6,14 +6,14 @@
                     <a href="/" class="login-logo">
                         <img src="img/logo.svg" alt="Quick Chat">
                     </a>
-                    <h6>In order to access your account, please enter the email id you provided during the registration process.</h6>
+                    <h6>Please Reset your Password</h6>
                     <div class="field-wrapper mb-3">
                         <input type="email" name="email" autofocus>
                         <div class="field-placeholder">Email ID</div>
                     </div>
                     <p id="message" style="color: red;"></p>
                     <div class="actions">
-                        <a href="/login">돌아가기</a>
+                        <a href="/">돌아가기</a>
                         <button type="submit" class="btn btn-primary ml-auto">Submit</button>
                     </div>
                 </div>
@@ -21,12 +21,10 @@
         </form>
     </div>
 </div>
-
 <script>
-    var msg = '<%=msg%>';
+    var result = "<%=resultMsg%>";
     
-    if(msg != ""){
-        document.getElementById('message').innerText = msg;
+    if(result != "") {
+        document.getElementById('message').innerText = result;
     }
-    
 </script>

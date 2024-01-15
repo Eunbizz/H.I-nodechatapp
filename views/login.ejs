@@ -1,7 +1,7 @@
     <!-- 로그인 세션 -->
     <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
         <div class="login-wrapper">
-            <form action="/" method="post">
+            <form action="/" method="post" id="loginForm">
                 <div class="login-screen">
                     <div class="login-body">
                         <a href="/" class="login-logo">
@@ -16,6 +16,7 @@
                             <input type="password" name="password">
                             <div class="field-placeholder">Password</div>
                         </div>
+                        <p id="confirm_message" style="color: red; margin-bottom:2vh;"></p>
                         <div class="actions">
                             <a href="/find">비밀번호 찾기</a>
                             <button type="submit" class="btn btn-primary">Login</button>
@@ -28,3 +29,10 @@
             </form>
         </div>
     </div>
+
+    <script>
+        // resultMsg value를 jquery로 confirm_message에 넣어준다.
+        var resultMsg = '<%= resultMsg %>';
+        $('#confirm_message').text(resultMsg);
+        
+    </script>

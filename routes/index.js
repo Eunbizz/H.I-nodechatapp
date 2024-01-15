@@ -1,109 +1,140 @@
 // 공통 페이지 제공(로그인, 회원가입, 암호찾기)
 
-var express = require('express');
+var express = require("express");
 var router = express.Router();
 
-var db = require('../models/index.js');
+var db = require("../models/index.js");
 var Op = db.Sequelize.Op;
 
 // 로그인 웹페이지 요청 및 응답
-router.get('/login', async(req, res)=>{
-  res.render('login.ejs',{layout:"authLayout", resultMsg:""})
+router.get("/", async (req, res) => {
+	res.render("login", { resultMsg: "", email: "", password: "", layout: "authLayout" });
 });
 
 // 로그인 처리 요청 및 응답, 로그인 완료 후 채팅 페이지 이동
-router.post('/', async(req, res)=>{
-  var email = req.body.email;
-  var password = req.body.member_password;
+router.post("/", async (req, res) => {
+	try {
+		// 사용자 입력 정보 추출
+		var email = req.body.email;
+		var member_password = req.body.password;
 
-  login = {
-    email,
-    member_password:password
-  }
+		// DB 조회
+		var member = await db.Member.findOne({ where: { email: email } });
 
-  var member = await db.Member.findOne({where:{email:login.email}});
+		var resultMsg = "";
+		if (member == null) {
+			resultMsg = "멤버 정보가 등록되지 않았습니다.";
+		} else {
+			if (member.member_password == member_password) {
+				res.redirect("/chat");
+			} else {
+				resultMsg = "암호가 일치하지 않습니다.";
+			}
+		}
 
-  var resultMsg = '';
-
-  if (member==null){
-    resultMsg = '관리자 정보가 등록되지 않았습니다.'
-  } else {
-    if (member.member_password == login.member_password) {
-      res.redirect('/chat');
-    } else {
-      resultMsg = '암호가 일치하지 않습니다.'
-    }
-  }
-  
-  if (resultMsg !== ''){
-    res.render('login', {resultMsg, login, member})
-  }
+		if (resultMsg !== "") {
+			res.render("login", { resultMsg, email, member_password, layout: "authLayout" });
+		}
+	} catch (err) {
+		res.statusMessage(500).send("Internal Server Error");
+	}
 });
 
-
-
 // 회원가입 웹페이지 요청 및 응답
-router.get('/entry', async(req, res)=>{
-  res.render('entry.ejs', {layout:"authLayout"})
+router.get("/entry", async (req, res) => {
+	res.render("entry.ejs", { resultMsg: "", email: "", password: "", layout: "authLayout" });
 });
 
 // 회원가입 처리 요청 및 응답, 회원가입 완료 후 로그인 페이지 이동
-router.post('/entry', async(req, res)=>{
+router.post("/entry", async (req, res) => {
+	try {
+		var email = req.body.email;
+		var name = req.body.name;
+		var member_password = req.body.member_password;
+		var telephone = req.body.telephone;
+		var birth_date = req.body.birth_date;
+		var profile_img_path = req.body.profile_img_path;
 
-  // step1: 회원가입페이지에서 사용자가 입력한 회원정보 추출
-  var email = req.body.email;
-  var name = req.body.name;
-  var password = req.body.password;
-  var telephone = req.body.telephone;
-  var birthDate = req.body.birthDate;
-  var profileImgPath = req.body.profileImgPath;
+		var member = {
+			email,
+			name,
+			member_password,
+			telephone,
+			birth_date,
+			profile_img_path,
+			entry_type_code: 1,
+			reg_member_id: 1,
+			use_state_code: 1,
+			reg_date: Date.now(),
+		};
 
-  // step2: db 신규 회원 등록 처리
-  member = {
-    email,
-    name,
-    member_password:password,
-    telephone,
-    birth_date:birthDate,
-    profile_img_path:profileImgPath
-  };
-
-  await db.Member.create(member)
-
-  // 등록완료시 로그인 페이지로 이동시키기
-  res.redirect('/login')
+		await db.Member.create(member);
+		res.redirect("/?registration=success");
+	} catch (err) {
+		res.status(500).send("Internal Server Error");
+	}
 });
 
-/* 암호찾기 웹페이지 요청과 응답 */
-router.get('/find', async(req, res, next)=>{
-  res.render('find', {msg:"", email:"", layout:"authLayout"});
+router.post("/checkEmail", async (req, res) => {
+	try {
+		var email = req.body.email;
+		var member = await db.Member.findOne({ where: { email: email } });
+
+		var resultMsg = "";
+
+		if (member == null && email != "") {
+			resultMsg = "valid";
+		} else {
+			if (email == "") {
+				resultMsg = "empty";
+			} else if (member.email == email) {
+				resultMsg = "exist";
+			} else {
+				resultMsg = "valid";
+			}
+		}
+		res.json({ resultMsg });
+	} catch (err) {
+		res.status(500).send("Internal Server Error");
+	}
 });
 
-/* 암호찾기 사용자 입력정보 처리 요청과 응답 */
-router.post('/find', async (req, res, next) => {
-  try {
-    var Email = req.body.email;
+// 암호 찾기 웹페이지 요청 및 응답
+router.get("/find", async (req, res) => {
+	res.render("find", { resultMsg: "", email: "", password: "", layout: "authLayout" });
+});
 
-    // DB에서 찾기
-    var email = await db.Member.findOne({ where: { email: Email } });
+// 암호찾기 처리 요청 및 응답,암호 찾기 완료 후 로그인 페이지 이동
+router.post("/find", async (req, res) => {
+	try {
+		var email = req.body.email;
 
-    var msg = '';
+		var member = await db.Member.findOne({ where: { email: email } });
+		var resultMsg = "";
+		if (member.email == email) {
+			res.render("reset_password", { layout: "authLayout", email, resultMsg });
+		} else {
+			resultMsg = "등록되지 않은 이메일입니다.";
+			res.render("find", { resultMsg, email, layout: "authLayout" });
+		}
+	} catch (err) {
+		res.status(500).send("Internal Server Error");
+	}
+});
 
-    if (!email || email.email !== Email) {
-      msg = '등록된 메일이 없습니다. 가입 후 이용 바랍니다.';
-
-    } else if (email.email == Email) {
-      msg = '메일찾기완료';
-    }
-
-    if (msg !== '') {
-      res.render('find', { msg, email, layout: "authLayout" })
-    }
-
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Internal Server Error');
-  }
+router.post("/reset_password", async (req, res) => {
+	var email = req.body.email;
+	var member_password = req.body.member_password;
+	var member = await db.Member.findOne({ where: { email: email } });
+	var resultMsg = "";
+	if (member.member_password == member_password) {
+		resultMsg = "이전과 동일한 암호입니다.";
+		res.render("reset_password", { layout: "authLayout", email, resultMsg });
+	} else {
+		member.member_password = member_password;
+		await member.save();
+		res.redirect("/");
+	}
 });
 
 module.exports = router;

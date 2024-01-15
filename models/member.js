@@ -36,7 +36,7 @@ module.exports = function(sequelize, DataTypes) {
             comment: '접속상태코드 0:아웃 1:접속중',
             },
         birth_date: {
-            type: DataTypes.STRING(6),
+            type: DataTypes.STRING(20),
             allowNull: true,
             comment: '생년월일',
             },

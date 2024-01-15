@@ -1,7 +1,7 @@
 	<!-- 회원가입 세션 -->
 	<div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
 		<div class="login-wrapper">
-			<form action="/entry" method="post">
+			<form action="/entry" method="post" id="entryForm">
 				<div class="login-screen">
 					<div class="login-body">
 						<a href="/" class="login-logo">
@@ -13,18 +13,22 @@
 							<input type="email" name="email" id="email" class="form-control" autofocus autocomplete="email">
 							<button type="button" id="checkEmail" class="btn btn-secondary ml-2">Check</button>
 						</div>
+						<p id="email_message" style="color: red; margin-bottom:2vh;"></p>
 						<div class="field-wrapper mb-3">
 							<input type="text" name="name" id="name" autocomplete="name">
 							<div class="field-placeholder">Name</div>
 						</div>
+						<p id="name_message" style="color: red; margin-bottom:2vh;"></p>
 						<div class="field-wrapper mb-3">
-							<input type="password" name="password" id="password" >
+							<input type="password" name="member_password" id="member_password" >
 							<div class="field-placeholder">Password</div>
 						</div>
+						<p id="password_message" style="color: red; margin-bottom:2vh;"></p>
 						<div class="field-wrapper mb-3">
 							<input type="password" name="confirm_password" id="confirm_password">
 							<div class="field-placeholder">Confirm Password</div>
 						</div>
+						<p id="confirm_message" style="color: red; margin-bottom:2vh;"></p>
 						<div class="field-wrapper mb-3">
 							<select name="country_code" id="country_code">
 								<option value="">Choose</option>
@@ -40,35 +44,90 @@
 							<div class="field-placeholder">Phone</div>
 						</div>
 						<div class="field-wrapper mb-3">
-							<input type="date" name="birthDate" id="birthDate">
+							<input type="date" name="birth_date" id="birth_date">
 							<div class="field-placeholder">Birthday</div>
 						</div>
 						<div class="field-wrapper mb-3">
-							<input type="file" name="profileImgPath" id="profileImgPath">
+							<input type="file" name="profile_img_path" id="profile_img_path">
 							<div class="field-placeholder">Profile Image
 						</div>
-
 					</div>
-					<div class="login-footer">
-						<span class="additional-link">Have an account? <a href="/" class="btn btn-secondary">Login</a></span>
+					<div class="text-right">
+						<button type="submit" class="btn btn-primary">Create</button><hr>
+						<span class="additional-link">Have an account? <a href="/" class="btn btn-secondary">Login</a></span><hr>
 					</div>
 				</div>
 			</form>
 		</div>
 	</div>
 
-	<script>
-		document.getElementById('country_code').addEventListener('change', function() {
-			var countryCodes = {
-				'KR': '+82',
-				'US': '+1',
-				'UK': '+44',
-				'JP': '+81'
-			};
-			var countryCode = this.value;
-			var phoneInput = document.getElementById('telephone');
-	
-			phoneInput.value = countryCodes[countryCode] ? countryCodes[countryCode] : '';
-		});
-	</script>
-	
+<script>
+	$(document).ready(function(){
+	});
+	$("#entryForm").submit(function(){
+		if($("#email").val()==""){
+			document.getElementById('email_message').innerText = "메일주소를 입력해주세요.";
+			$("#email").focus();
+			return false
+		}
+		if($("#name").val()==""){
+			document.getElementById('name_message').innerText = "이름을 입력해주세요.";
+			$("#name").focus();
+			return false
+		}
+		else{
+			document.getElementById('name_message').innerText = "";
+		}
+		if($("#member_password").val()==""){
+			document.getElementById('password_message').innerText = "암호를 입력해주세요.";
+			$("#member_password").focus();
+			return false
+		}
+		else{
+			document.getElementById('password_message').innerText = "";
+		}
+		if($("#confirm_password").val()==""){
+			document.getElementById('confirm_message').innerText = "암호 재확인 값을 입력해주세요.";
+			$("#confirm_password").focus();
+			return false
+		}
+		else{
+			document.getElementById('confirm_message').innerText = "";
+		}
+		if($("#member_password").val()!=$("#confirm_password").val()){
+			document.getElementById('confirm_message').innerText = "암호값이 일치하지 않습니다.";
+			$("#confirm_password").val("");
+			$("#member_password").focus();
+			return false
+		}
+		else{
+			document.getElementById('confirm_message').innerText = "";
+		}
+	})
+	// when checkEmail button is pressed check if there is the same email in the DB
+	$("#checkEmail").click(function(){
+		$.ajax({
+			url: "/checkEmail",
+			type: "post",
+			data: {
+				email: $("#email").val()
+			},
+			success: function(data){
+				if(data.resultMsg == 'exist'){
+					document.getElementById('email_message').innerText = "이미 가입된 이메일입니다.";
+					$("#email").val("");
+					$("#email").focus();
+				}else if (data.resultMsg == 'empty'){
+					document.getElementById('email_message').innerText = "이메일을 입력해주세요.";
+					document.getElementById('email_message').style.color = "red";
+					$("#email").focus();
+				}else{
+					document.getElementById('email_message').innerText = "사용가능한 이메일입니다.";
+					document.getElementById('email_message').style.color = "blue";
+				}
+			}
+		})
+	})
+
+
+</script>
