@@ -88,8 +88,6 @@ router.post('/login', async (req, res, next) => {
     res.json(apiResult);
 });
 
-
-
 // 회원가입
 router.post('/entry', async(req, res, next)=>{
 
@@ -179,7 +177,6 @@ router.post("/checkEmail", async (req, res) => {
 
 // 사용자 정보조회
 router.get('/profile',tokenAuthCheck, async(req, res, next)=> {
-
     var apiResult = {
         code: 400,
         data: null,
@@ -187,10 +184,6 @@ router.get('/profile',tokenAuthCheck, async(req, res, next)=> {
     };
 
     try {
-
-        // STEP1: 웹브라우저 헤더에서 사용자 JWT Bearer 인증토큰값을 추출한다.
-        // split은 문자 쪼개기('Bearer 뒤에 있는 첫번째 문자열 추출)
-        // req.headers.authorization = "Bearer WQKLWQJEKLJDSAEWQ111QWE" 
         var token = req.headers.authorization.split('Bearer ')[1];
         var tokenJsonData = await jwt.verify(token, process.env.JWT_SECRET);
         
@@ -222,8 +215,6 @@ router.get('/profile',tokenAuthCheck, async(req, res, next)=> {
 
 })
 
-
-
 // find member
 router.post('/find', async (req, res, next) => {
     const emailData = req.body.email;
@@ -249,7 +240,7 @@ router.post('/find', async (req, res, next) => {
 });
 
 // Modify an existing member
-router.post('/modify', tokenAuthChecking, async (req, res, next) => {
+router.post('/modify', tokenAuthCheck, async (req, res, next) => {
     var apiResult = {
 		code: 400,
 		data: null,
@@ -298,7 +289,7 @@ router.post('/delete', async(req, res) =>{
 });
 
 // 설정 페이지 암호 변경
-router.post('/paaword/update', tokenAuthChecking, async(req, res) =>{
+router.post('/paaword/update', tokenAuthCheck, async(req, res) =>{
     var apiResult = {
 		code: 400,
 		data: null,

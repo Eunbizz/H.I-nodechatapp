@@ -9,7 +9,6 @@ const cors = require("cors");
 var indexRouter = require('./routes/index');
 var memberAPIRouter = require('./routes/memberAPI');
 var channelRouter = require('./routes/channel');
-
 var channelAPIRouter = require('./routes/channelAPI');
 var sequelize = require('./models/index.js').sequelize;
 
