@@ -67,6 +67,8 @@
 							<img src="img/groups.svg" alt="Groups">
 							<span class="nav-link-text">Groups</span>
 						</a>
+
+						<!-- 계정 설정 아이콘 -->
 						<a class="nav-link" id="settings-tab" data-toggle="pill" href="#tab-settings" role="tab" aria-controls="tab-settings" aria-selected="false">
 							<img src="img/settings.svg" alt="Settings">
 							<span class="nav-link-text">Settings</span>
@@ -1266,7 +1268,7 @@
 													<div class="upload-profile">
 
 														<div class="upload-profile-image">
-															<img src="img/user2.png" alt="Profile Image">
+															<img src="" id="profile_img" alt="Profile Image">
 														</div>
 														<div class="field-wrapper">
 															<div class="custom-file">
@@ -1278,7 +1280,7 @@
 													</div>
 
 													<div class="field-wrapper">
-														<input type="text" id="member_name" value=""/>
+														<input type="text" id="member_name" value="" />
 														<div class="field-placeholder">Full Name</div>
 													</div>
 
@@ -1288,7 +1290,7 @@
 													</div>
 
 													<div class="field-wrapper m-0">
-														<input type="text" id="telephone"  value="" />
+														<input type="text" id="telephone" value="" />
 														<div class="field-placeholder">Contact</div>
 													</div>
 												</div>
@@ -1306,20 +1308,20 @@
 
 												<div class="account-settings-body">
 													<div class="field-wrapper">
-														<input type="text" value="" />
+														<input type="text" id="cur_pwd" value="" />
 														<div class="field-placeholder">Current Password</div>
 													</div>
 													<div class="field-wrapper">
-														<input type="password" value="" />
+														<input type="password" id="new_pwd" value="" />
 														<div class="field-placeholder">New Password</div>
 													</div>
 													<div class="field-wrapper m-0">
-														<input type="password" value="" />
+														<input type="password" id="confirm_pwd" value="" />
 														<div class="field-placeholder">Confirm Password</div>
 													</div>
 
 													<div class="mt-3">
-														<button class="btn btn-primary btn-block">Change Password</button>
+														<button id="change_pwd" class="btn btn-primary btn-block">Change Password</button>
 													</div>
 
 												</div>
@@ -1391,7 +1393,7 @@
 								<!-- Account Settings Container End -->
 
 								<div class="save-btn-block">
-									<button class="btn btn-primary btn-block">Save Changes</button>
+									<button type="button" class="btn btn-primary btn-block" id="saveChanges">Save Changes</button>
 								</div>
 
 							</div>
@@ -1934,46 +1936,98 @@
 
 		<!-- Main Js Required -->
 		<script src="js/main.js"></script>
-
-
+		
 		<script>
-
-			// 환경설정 아이콘 클릭시 백엔드에서 프로필정보 조회 바인딩하기
-			$('#settings-tab').click(function() {
-
-				// 웹브라우저 로컬스토리지에 저장된 사용자인증 JWT토큰정보 추출하기
+			// 환경설정 아이콘 클릭시 백엔드에서 프로필 정보 조회 바인딩하기
+			$("#settings-tab").click(function(){
+				// 웹브라우저 로컬 스토리지에 저장된 사용자 인증 JWT 토큰 정보 추출하기
 				var loginUserToken = localStorage.getItem("userauthtoken");
+
 				$.ajax({
-					type:'GET',
-					url:'/api/member/profile',
-					// 토큰정보
+					type:"GET",
+					url:"/api/member/profile",
 					headers:{
 						Authorization:`Bearer ${loginUserToken}`
 					},
-					dataType:'json',
-					success:function(result) {
-						console.log("현재 사용자 정보 호출결과:", result);
-												
-						if(result.code == 200) {
+					dataType:"json",
+					success:function(result){
+						console.log("현재 사용자 정보 호출 결과: ", result);
+						if (result.code == 200){
+							// 프로필 정보 바인딩
 							$("#email").val(result.data.email);
 							$("#member_name").val(result.data.name);
 							$("#telephone").val(result.data.telephone);
-							
-							$("profile_img").attr("src", result.data.profile_img_path)
 
-						} else {
-							if(result.code == 400) {
-								alert(result.code);
-							}
+							$("#profile_img").attr("src",result.data.profile_img_path);
+						}else if(result.code ==400){
+							alert(result.msg)
+						}else{
+							alert("현재 사용자 정보 호출 실패: "+result.msg);
 						}
 					},
 					error:function(err){
-						console.log("백엔드 API호출 에러발생:", err);
+						console.log("백엔드 API 호출 에러 발생: ",err);
 					}
 				})
-			})
+			});
+
+			// 사용자 정보 수정
+			$("#saveChanges").click(function(){
+				var loginUserToken = localStorage.getItem("userauthtoken");
+
+				$.ajax({
+					type:"POST",
+					url:"/api/member/modify",
+					headers:{
+						Authorization:`Bearer ${loginUserToken}`
+					},
+					dataType:"json",
+					data:{
+						profile_img_path:$("#profile_img").attr("src"),
+						name:$("#member_name").val(),
+						email:$("#email").val(),
+						telephone:$("#telephone").val()
+					},
+					success:function(result){
+						if (result.code == 200){
+							console.log("사용자 정보 수정 성공: ",result);
+						}else if(result.code ==400){
+							console.log(result.msg)
+						}else{
+							console.log("사용자 정보 수정 실패: "+result.msg);
+						}
+					}
+				})
+			});
+
+			// 비밀번호 수정
+			$("#change_pwd").click(function(){
+				var loginUserToken = localStorage.getItem("userauthtoken");
+
+				$.ajax({
+					type:"POST",
+					url:"/api/member/password/update",
+					headers:{
+						Authorization:`Bearer ${loginUserToken}`
+					},
+					dataType:"json",
+					data:{
+						cur_pwd:$("#cur_pwd").val(),
+						new_pwd:$("#new_pwd").val(),
+						confirm_pwd:$("#confirm_pwd").val()
+					},
+					success:function(result){
+						if (result.code == 200){
+							console.log("비밀번호 수정 성공: ",result);
+						}else if(result.code ==400){
+							console.log(result.msg)
+						}else{
+							console.log("비밀번호 수정 실패: "+result.msg);
+						}
+					}
+				})
+			});
+
 		</script>
-
-
 	</body>
 </html>

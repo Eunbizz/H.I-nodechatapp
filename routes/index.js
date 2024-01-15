@@ -4,14 +4,7 @@ var express = require("express");
 var router = express.Router();
 
 var db = require("../models/index.js");
-var Op = db.Sequelize.Op;
-
 var bcrypt = require('bcryptjs');
-
-// jsonwebtoken 패키지 참조하기
-const jwt = require('jsonwebtoken');
-
-
 
 // 로그인 웹페이지 요청 및 응답
 router.get("/", async (req, res) => {
