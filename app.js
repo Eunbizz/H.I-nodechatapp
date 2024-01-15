@@ -48,7 +48,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
-app.use('/api/member', memberAPIRouter);
+// app.use('/api/member', memberAPIRouter);
 app.use('/chat', channelRouter);
 
 app.use('/api/member', memberAPIRouter);
