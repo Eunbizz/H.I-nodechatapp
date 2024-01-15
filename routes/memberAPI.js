@@ -8,7 +8,14 @@ var AES = require("mysql-aes");
 var db = require("../models/index.js");
 var jwt = require("jsonwebtoken");
 
-var {tokenAuthChecking} = require("./apiMiddleware.js");
+var jwt = require("jsonwebtoken");
+var bcrypt = require("bcryptjs");
+var AES = require("mysql-aes");
+var db = require("../models/index.js");
+
+var {tokenAuthCheck} = require("./apiMiddleware.js");
+
+// var {tokenAuthChecking} = require("./apiMiddleware.js");
 
 // Get all members
 router.get('/all', async(req, res, next)=>{
@@ -20,87 +27,202 @@ router.get('/all', async(req, res, next)=>{
         res.json({ message: "Member not find", error: error });
     }
 });
-
+// 로그인 api
 router.post('/login', async (req, res, next) => {
-    const { email, password } = req.body;
-
-    try {
-        const user = await db.Member.findOne({ where: { email } });
-
-        if (!user) {
-            return res.json({ message: "이메일이나 비밀번호가 올바르지 않습니다." });
-        }
-
-        if (password === user.member_password) {
-            // 로그인 성공
-            res.json({ message: "로그인 성공", user });
-        } else {
-            // 비밀번호 불일치
-            res.json({ message: "이메일이나 비밀번호가 올바르지 않습니다." });
-        }
-
-    } catch (error) {
-        console.log(error);
-        res.json({ message: "Member not Login", error });
-    }
-});
-
-// Create a new member
-router.post('/entry', async(req, res, next)=>{
     var apiResult = {
-		code: 400,
-		data: null,
-		msg: "",
-	};
-    
-    var memberData = {
-        email: req.body.email,
-        member_password: req.body.password,
-        name: req.body.name,
-        telephone: req.body.telephone,
-        entry_type_code: 1,
-        use_state_code: 1,
-        profile_img_path: req.body.profileImgPath,
-        birth_date: req.body.birthDate,
-        reg_date: Date.now(),
-        reg_member_id: 1,
-        edit_date: Date.now()
+        code: 400,
+        data: null,
+        msg: "",
     };
 
     try {
-        // 이메일 중복체크
-        var regEmail = await db.Member.findOne({ where: { email: memberData.email } });
+        var { email, password } = req.body;
 
-        // 이메일 중복이 아닐 경우 회원가입 처리
-        if(regEmail == null) {
-            // 비밀번호, 전화번호 암호화
-            var enc_pass = byctrpt.hashSync(memberData.member_password, 8);
-            var enc_tel = AES.encrypt(memberData.telephone, process.env.MYSQL_AES_KEY);
-            // 암호화된 비밀번호, 전화번호로 회원가입 처리
-            memberData.member_password = enc_pass;
-            memberData.telephone = enc_tel;
-            var registeredMember = await db.Member.create(memberData);
-            // 암호화된 비밀번호, 전화번호 복호화
-            registeredMember.member_password = "";
-            var dec_tel = AES.decrypt(enc_tel, process.env.MYSQL_AES_KEY);
-            registeredMember.telephone = dec_tel;
+        // 이메일 찾기
+        var member = await db.Member.findOne({ where: { email: email } });
+        var resultMsg = "";
 
-            apiResult.code = 200;
-            apiResult.data = registeredMember;
-            apiResult.msg = "ok";
+        // member 이메일이 null 값일때
+        if (member == null) {
+            resultMsg = "NotExistEmail";
+            apiResult.code = 400;
+            apiResult.data = null;
+            apiResult.msg = resultMsg;
         } else {
-            apiResult.code = 500;
-			apiResult.data = null;
-			apiResult.msg = "ExistDuplicatedEmail";
+            // 패스워드는 단방향 암호화라서 복호화 불가능. 동일암호 일치여부 체크
+            var comparePassword = await bcrypt.compare(password, member.member_password);
+
+            if (comparePassword) {
+                resultMsg = "Ok";
+
+                member.member_password = "";
+                member.telephone = AES.decrypt(member.telephone, process.env.MYSQL_AES_KEY);
+
+                var memberToken = {
+                    // 프라이머리키는 필수
+                    member_id: member.member_id,
+                    email: member.email,
+                    name: member.name,
+                    telephone: member.telephone,
+                };
+
+                var token = await jwt.sign(memberToken, process.env.JWT_SECRET, { expiresIn: '24h', issuer: 'robin' });
+
+                apiResult.code = 200;
+                // 토큰데이터 넘기기
+                apiResult.data = token;
+                apiResult.msg = resultMsg;
+            } else {
+                resultMsg = "NotCorrectword";
+                apiResult.code = 400;
+                apiResult.data = null;
+                apiResult.msg = resultMsg;
+            }
         }
-    }catch(error) {
-        console.log("서버에러발생-/api/member/entry", err.meesage);
-		apiResult.code = 500;
-		apiResult.data = null;
-		apiResult.msg = err.message;
+    } catch (error) {
+        console.log("서버에러발생-/api/member/login", error.message);  // 수정: error.meesage -> error.message
+        apiResult.code = 500;
+        apiResult.data = null;
+        apiResult.msg = error.message;
     }
     res.json(apiResult);
 });
+
+
+
+// 회원가입
+router.post('/entry', async(req, res, next)=>{
+
+    var apiResult = {
+        code: 400,
+        data: null,
+        msg: "",
+    };
+
+    try {
+            var email = req.body.email
+            var member_password = req.body.member_password
+            var name = req.body.name
+            var telephone = req.body.telephone
+
+        // 중복체크
+        var regEmail = await db.Member.findOne({ where: { email } });
+
+        if(regEmail != null) {
+
+            apiResult.code = 500;
+            apiResult.data = null;
+            apiResult.msg = "ExistDoubleEmail";
+
+        } else {
+            
+            // 단방향 암호화
+            var bcryptedPassword = await bcrypt.hash(member_password, 12);
+            // 양방향 암호화
+            var encryptTelephone = AES.encrypt(telephone, process.env.MYSQL_AES_KEY);
+
+            var member = {
+                email: email,
+                member_password: bcryptedPassword,
+                name: name,
+                telephone: encryptTelephone,
+                entry_type_code: 1,
+                use_state_code: 1,
+                reg_date: Date.now(),
+                reg_member_id: 1,
+                edit_date: Date.now()
+            };
+
+            var regMember = await db.Member.create(member);
+
+            regMember.member_password = "";
+            var decryptTelephone = AES.decrypt(encryptTelephone, process.env.MYSQL_AES_KEY)
+            regMember.telephone = decryptTelephone;
+
+            apiResult.code = 200;
+            apiResult.data = regMember;
+            apiResult.msg = "ok";
+        }
+    }catch(error) {
+        console.log("서버에러발생-/api/member/entry", error.meesage);
+        apiResult.code = 500;
+        apiResult.data = null;
+        apiResult.msg = "Failed";
+    }
+    res.json(apiResult);
+});
+
+// 이메일 중복체크
+router.post("/checkEmail", async (req, res) => {
+	try {
+		var email = req.body.email;
+		var member = await db.Member.findOne({ where: { email: email } });
+
+		var resultMsg = "";
+
+		if (member == null && email != "") {
+			resultMsg = "valid";
+		} else {
+			if (email == "") {
+				resultMsg = "empty";
+			} else if (member.email == email) {
+				resultMsg = "exist";
+			} else {
+				resultMsg = "valid";
+			}
+		}
+		res.json({ resultMsg });
+	} catch (err) {
+		res.status(500).send("Internal Server Error");
+	}
+});
+
+// 사용자 정보조회
+router.get('/profile',tokenAuthCheck, async(req, res, next)=> {
+
+    var apiResult = {
+        code: 400,
+        data: null,
+        msg: "",
+    };
+
+    try {
+
+        // STEP1: 웹브라우저 헤더에서 사용자 JWT Bearer 인증토큰값을 추출한다.
+        // split은 문자 쪼개기('Bearer 뒤에 있는 첫번째 문자열 추출)
+        // req.headers.authorization = "Bearer WQKLWQJEKLJDSAEWQ111QWE" 
+        var token = req.headers.authorization.split('Bearer ')[1];
+        var tokenJsonData = await jwt.verify(token, process.env.JWT_SECRET);
+        
+        // 웹브라우저에서 전달된 JWT토큰문자열에서 필요한 로그인 사용자 정보를 추출한다.
+        var loginMemberId = tokenJsonData.member_id;
+        // ㄴvar loginMemberEmail = tokenJsonData.email;
+
+        var dbMember = await db.Member.findOne({
+            where:{member_id:loginMemberId},
+            // 토큰안에 정보가 없으면 db에서 가져온다.
+            attributes:['email','name','profile_img_path','telephone','member_password','birth_date']
+        });
+
+        // 복호화는 조회 한 후 해야함. 복호화하고 연락처 갱신
+        dbMember.telephone = AES.decrypt(dbMember.telephone, process.env.MYSQL_AES_KEY);
+
+        apiResult.code = 200;
+        apiResult.data = dbMember;
+        apiResult.msg = "OK"
+
+
+    } catch(err){
+        apiResult.code = 500;
+        apiResult.data = null;
+        apiResult.msg = "Failed"
+    }
+
+    res.json(apiResult);
+
+})
+
+
 
 // find member
 router.post('/find', async (req, res, next) => {
