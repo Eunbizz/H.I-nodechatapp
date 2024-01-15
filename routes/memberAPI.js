@@ -8,14 +8,10 @@ var AES = require("mysql-aes");
 var db = require("../models/index.js");
 var jwt = require("jsonwebtoken");
 
-var jwt = require("jsonwebtoken");
-var bcrypt = require("bcryptjs");
-var AES = require("mysql-aes");
-var db = require("../models/index.js");
+// jsonwebtoken 참조
+const jwt = require('jsonwebtoken');
 
-var {tokenAuthCheck} = require("./apiMiddleware.js");
-
-// var {tokenAuthChecking} = require("./apiMiddleware.js");
+var Member = require('../models/member');
 
 // Get all members
 router.get('/all', async(req, res, next)=>{

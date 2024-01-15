@@ -33,11 +33,11 @@ app.set("layout extractScripts", true);
 app.set("layout extractStyles", true); 
 app.set("layout extractMetas", true); 
 
-// 로그인, 회원가입, 비밀번호찾기 레이아웃
-app.set('authLayout', 'authLayout');
-app.set("authLayout extractScripts", true); 
-app.set("authLayout extractStyles", true); 
-app.set("authLayout extractMetas", true); 
+//레이아웃 설정
+app.set('layout','authLayout');
+app.set("layout extractScripts", true);
+app.set("layout extractStyles", true);
+app.set("layout extractMetas", true);
 app.use(expressLayouts);
 
 
@@ -50,7 +50,13 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/api/member', memberAPIRouter);
 app.use('/chat', channelRouter);
+
+app.use('/api/member', memberAPIRouter);
 app.use('/api/channel', channelAPIRouter);
+app.use('/api/common', commonAPIRouter);
+
+
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
