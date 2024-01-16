@@ -1977,6 +1977,10 @@
 	<script>
 		// 환경설정 아이콘 클릭시 백엔드에서 프로필 정보 조회 바인딩하기
 		var imgPath = ""
+		$(document).ready(function () {
+			console.log("JWT 토큰: ", localStorage.getItem("userauthtoken"));
+		});
+
 		$("#settings-tab").click(function () {
 			// 웹브라우저 로컬 스토리지에 저장된 사용자 인증 JWT 토큰 정보 추출하기
 			var loginUserToken = localStorage.getItem("userauthtoken");
@@ -2009,7 +2013,6 @@
 			})
 		});
 
-		
 		$("#Profileimg").change(function () {
 			var formData = new FormData();
 			var fileInput = document.getElementById('Profileimg');
@@ -2018,7 +2021,6 @@
 			}
 
 			// 이미지 저장 밎 multer 라우터 호출, 이미지 경로 반환
-			
 			$.ajax({
 				data: formData,
 				type: "POST",

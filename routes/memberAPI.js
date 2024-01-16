@@ -18,7 +18,6 @@ router.get("/all", async (req, res, next) => {
 		var members = await db.Member.findAll();
 		res.json(members);
 	} catch (error) {
-		console.log(error);
 		res.json({ message: "Member not find", error: error });
 	}
 });
@@ -283,8 +282,6 @@ router.post("/modify", tokenAuthCheck, async (req, res, next) => {
 		apiResult.code = 500;
 		apiResult.data = null;
 		apiResult.msg = error.message;
-		console.log(error);
-		console.log(error.message);
 	}
 	res.json(apiResult);
 });
@@ -297,7 +294,6 @@ router.post("/delete", async (req, res) => {
 		res.json(result);
 		console.log(result, "삭제완료");
 	} catch (error) {
-		console.log(error);
 		res.status(500).json({ message: "Member not deleted", error: error });
 	}
 });
@@ -352,22 +348,8 @@ router.post("/password/update", tokenAuthCheck, async (req, res) => {
 		apiResult.code = 500;
 		apiResult.data = null;
 		apiResult.msg = error.message;
-		console.log(error);
-		console.log(error.message);
 	}
 	res.json(apiResult);
-});
-
-// Get a single member by ID
-router.get("/:mid", async (req, res) => {
-	var memberId = parseInt(req.params.mid, 10); // 10진수 정수로 변환
-	try {
-		var members = await db.Member.findOne({ where: { member_id: memberId } });
-		res.json({ members });
-	} catch (error) {
-		console.log(error);
-		res.status(500).json({ message: "Member not findOne", error: error });
-	}
 });
 
 module.exports = router;
