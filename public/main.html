@@ -2014,25 +2014,29 @@
 			})
 		});
 
-		
+		// 파일 업로드 처리
+		// 파일 인풋 태그 id가 값이 바뀌면 실행됨(사용자가 파일을 선택하면 실행됨)
 		$("#Profileimg").change(function () {
+			// 파일 업로드를 위한 FormData 생성 
 			var formData = new FormData();
 			var fileInput = document.getElementById('Profileimg');
 			if (fileInput.files[0]) {
+				// 'file'이라는 키로 파일 정보 추가
 				formData.append('file', fileInput.files[0]);
 			}
 
 			// 이미지 저장 밎 multer 라우터 호출, 이미지 경로 반환
-			
 			$.ajax({
 				data: formData,
 				type: "POST",
 				url: "/api/common/upload",
+				// Authorization는 하지 않음
 				cache: false,
 				processData: false,
 				contentType: false,
 				success: function (result) {
 					if (result.code == 200) {
+						// 프로필 이미지 경로를 받아 업데이트
 						$("#profile_img").attr("src", result.data);
 						imgPath = result.data;
 						console.log(result.data);
