@@ -60,6 +60,7 @@ router.post("/login", async (req, res, next) => {
 					email: member.email,
 					name: member.name,
 					telephone: member.telephone,
+					profile_img_path: member.profile_img_path
 				};
 
 				var token = await jwt.sign(memberToken, process.env.JWT_SECRET, {
@@ -299,7 +300,7 @@ router.post("/delete", async (req, res) => {
 });
 
 // 설정 페이지 암호 변경
-router.post("/paaword/update", tokenAuthCheck, async (req, res) => {
+router.post("/password/update", tokenAuthCheck, async (req, res) => {
 	var apiResult = {
 		code: 400,
 		data: null,

@@ -2100,7 +2100,7 @@
 			e.preventDefault();
 			var formData = new FormData(this);
 			$.ajax({
-				url: '/your-upload-route', // 백엔드 라우터 경로
+				url: '/api/common/upload', // 백엔드 라우터 경로
 				type: 'POST',
 				data: formData,
 				processData: false, // processData와 contentType을 false로 설정
