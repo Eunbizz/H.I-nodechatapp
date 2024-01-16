@@ -6,6 +6,7 @@ var router = express.Router();
 
 // multer 멀티 업로드 패키지 참조
 var multer = require('multer');
+var moment = require('moment');
 
 // 파일저장위치 지정
 var storage  = multer.diskStorage({ 
@@ -26,13 +27,12 @@ var sequelize = db.sequelize;
 
 
 // 파일 업로드 API
-router.get('/upload', simpleUpload.single('file'), async(req,res)=>{
+router.post('/upload', simpleUpload.single('file'), async(req,res)=>{
     var apiResult = {
         code: 400,
         data: null,
         msg: "",
      };
-    
     try{
         // 파일이 입력되지 않았을 경우
         if (!req.file){

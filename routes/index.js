@@ -4,7 +4,7 @@ var express = require("express");
 var router = express.Router();
 
 var db = require("../models/index.js");
-var bcrypt = require('bcryptjs');
+var bcrypt = require("bcryptjs");
 
 // 로그인 웹페이지 요청 및 응답
 router.get("/", async (req, res) => {
