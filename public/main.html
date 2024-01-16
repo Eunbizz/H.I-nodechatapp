@@ -492,7 +492,7 @@
 
 								<!-- User profile start -->
 								<div class="user-profile">
-									<img src="img/user2.png" alt="User Profile" />
+									<img src="" id="profile_userImg" alt="User Profile" />
 									<div class="dropdown online-status">
 										<button class="btn dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 											<span class="online">Online</span>
@@ -503,7 +503,7 @@
 											<a class="dropdown-item offline" href="#">Offline</a>
 										</div>
 									</div>
-									<h5 id="memberName">Jennifer Lopezx</h5>
+									<h5 id="memberName" val=""></h5>
 									<h6>Bern, Switzerland</h6>
 								</div>
 								<!-- User profile end -->
@@ -1956,10 +1956,14 @@
 						if (result.code == 200){
 							// 프로필 정보 바인딩
 							$("#email").val(result.data.email);
-							$("#member_name, #memberName").val(result.data.name);
+							$("#member_name").val(result.data.name);
 							$("#telephone").val(result.data.telephone);
 
-							$("#profile_img").attr("src",result.data.profile_img_path);
+							// profile page의 #memberName 추가
+							$("#memberName").text(result.data.name);
+
+							// profile page의 #profile_userImg 추가
+							$("#profile_img, #profile_userImg").attr("src",result.data.profile_img_path);
 						}else if(result.code ==400){
 							alert(result.msg)
 						}else{
