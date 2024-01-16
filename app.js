@@ -34,7 +34,7 @@ app.set("layout extractScripts", true);
 app.set("layout extractStyles", true);
 app.set("layout extractMetas", true);
 
-// 로그인, 회원가입, 비밀번호찾기 레이아웃
+
 app.set("authLayout", "authLayout");
 app.set("authLayout extractScripts", true);
 app.set("authLayout extractStyles", true);

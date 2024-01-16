@@ -3,14 +3,14 @@
 
 var express = require("express");
 var router = express.Router();
-var byctrpt = require("bcryptjs");
+var bcrypt = require("bcryptjs");
 var AES = require("mysql-aes");
 var db = require("../models/index.js");
 var jwt = require("jsonwebtoken");
 
 var { tokenAuthCheck } = require("./apiMiddleware.js");
 
-// var {tokenAuthChecking} = require("./apiMiddleware.js");
+// var Member = require('../models/member');
 
 // Get all members
 router.get("/all", async (req, res, next) => {
@@ -22,6 +22,7 @@ router.get("/all", async (req, res, next) => {
 		res.json({ message: "Member not find", error: error });
 	}
 });
+
 // 로그인 api
 router.post("/login", async (req, res, next) => {
 	var apiResult = {
@@ -87,61 +88,67 @@ router.post("/login", async (req, res, next) => {
 });
 
 // 회원가입
-router.post("/entry", async (req, res, next) => {
-	var apiResult = {
-		code: 400,
-		data: null,
-		msg: "",
-	};
+router.post('/entry', async(req, res, next)=>{
 
-	try {
-		var email = req.body.email;
-		var member_password = req.body.member_password;
-		var name = req.body.name;
-		var telephone = req.body.telephone;
+    var apiResult = {
+        code: 400,
+        data: null,
+        msg: "",
+    };
 
-		// 중복체크
-		var regEmail = await db.Member.findOne({ where: { email } });
+    try {
+            var email = req.body.email
+            var member_password = req.body.member_password
+            var name = req.body.name
+            var telephone = req.body.telephone
 
-		if (regEmail != null) {
-			apiResult.code = 500;
-			apiResult.data = null;
-			apiResult.msg = "ExistDoubleEmail";
-		} else {
-			// 단방향 암호화
-			var bcryptedPassword = await bcrypt.hash(member_password, 12);
-			// 양방향 암호화
-			var encryptTelephone = AES.encrypt(telephone, process.env.MYSQL_AES_KEY);
+        // 중복체크
+        var regEmail = await db.Member.findOne({ where: { email } });
 
-			var member = {
-				email: email,
-				member_password: bcryptedPassword,
-				name: name,
-				telephone: encryptTelephone,
-				entry_type_code: 1,
-				use_state_code: 1,
-				reg_date: Date.now(),
-				reg_member_id: 1,
-				edit_date: Date.now(),
-			};
+        if(regEmail != null) {
 
-			var regMember = await db.Member.create(member);
+            apiResult.code = 500;
+            apiResult.data = null;
+            apiResult.msg = "ExistDoubleEmail";
 
-			regMember.member_password = "";
-			var decryptTelephone = AES.decrypt(encryptTelephone, process.env.MYSQL_AES_KEY);
-			regMember.telephone = decryptTelephone;
+        } else {
+            
+            // 단방향 암호화
+            var bcryptedPassword = await bcrypt.hash(member_password, 12);
+            // 양방향 암호화
+            var encryptTelephone = AES.encrypt(telephone, process.env.MYSQL_AES_KEY);
 
-			apiResult.code = 200;
-			apiResult.data = regMember;
-			apiResult.msg = "ok";
-		}
-	} catch (error) {
-		console.log("서버에러발생-/api/member/entry", error.meesage);
-		apiResult.code = 500;
-		apiResult.data = null;
-		apiResult.msg = "Failed";
-	}
-	res.json(apiResult);
+            var member = {
+                email: email,
+                member_password: bcryptedPassword,
+                name: name,
+                telephone: encryptTelephone,
+                profile_img_path:"",
+                entry_type_code: 1,
+                use_state_code: 1,
+                reg_date: Date.now(),
+                reg_member_id: 1,
+                edit_date: Date.now(),
+                edit_member_id: 1
+            };
+
+            var regMember = await db.Member.create(member);
+
+            regMember.member_password = "";
+            var decryptTelephone = AES.decrypt(encryptTelephone, process.env.MYSQL_AES_KEY)
+            regMember.telephone = decryptTelephone;
+
+            apiResult.code = 200;
+            apiResult.data = regMember;
+            apiResult.msg = "ok";
+        }
+    }catch(error) {
+        console.log("서버에러발생-/api/member/entry", error.message);
+        apiResult.code = 500;
+        apiResult.data = null;
+        apiResult.msg = "Failed";
+    }
+    res.json(apiResult);
 });
 
 // 이메일 중복체크
@@ -346,6 +353,7 @@ router.post("/paaword/update", tokenAuthCheck, async (req, res) => {
 	}
 	res.json(apiResult);
 });
+
 
 // Get a single member by ID
 router.get("/:mid", async (req, res) => {
