@@ -1283,8 +1283,8 @@
 													</div>
 													<div class="field-wrapper">
 														<div class="custom-file">
-															<input type="file" name="image" class="custom-file-input"
-																id="Profileimg">
+															<input type="file" name="Profileimg"
+																class="custom-file-input" id="Profileimg">
 															<label class="custom-file-label" for="Profileimg">Choose
 																file</label>
 														</div>
@@ -1324,7 +1324,7 @@
 
 											<div class="account-settings-body">
 												<div class="field-wrapper">
-													<input type="text" id="cur_pwd" value="" />
+													<input type="password" id="cur_pwd" value="" />
 													<div class="field-placeholder">Current Password</div>
 												</div>
 												<div class="field-wrapper">
@@ -1337,8 +1337,9 @@
 												</div>
 
 												<div class="mt-3">
-													<button id="change_pwd" class="btn btn-primary btn-block">Change
+													<button button="button" id="change_pwd" class="btn btn-primary btn-block">Change
 														Password</button>
+													
 												</div>
 
 											</div>
@@ -1975,6 +1976,7 @@
 
 	<script>
 		// 환경설정 아이콘 클릭시 백엔드에서 프로필 정보 조회 바인딩하기
+		var imgPath = ""
 		$("#settings-tab").click(function () {
 			// 웹브라우저 로컬 스토리지에 저장된 사용자 인증 JWT 토큰 정보 추출하기
 			var loginUserToken = localStorage.getItem("userauthtoken");
@@ -1993,8 +1995,8 @@
 						$("#email").val(result.data.email);
 						$("#member_name").val(result.data.name);
 						$("#telephone").val(result.data.telephone);
-
 						$("#profile_img").attr("src", result.data.profile_img_path);
+						imgPath = result.data.profile_img_path;
 					} else if (result.code == 400) {
 						alert(result.msg)
 					} else {
@@ -2007,65 +2009,72 @@
 			})
 		});
 
-		// 사용자 정보 수정
-		$("#saveChanges").click(function () {
-			var loginUserToken = localStorage.getItem("userauthtoken");
-			// profile image type check
+		
+		$("#Profileimg").change(function () {
 			var formData = new FormData();
 			var fileInput = document.getElementById('Profileimg');
-			if(fileInput.files[0]) {
+			if (fileInput.files[0]) {
 				formData.append('file', fileInput.files[0]);
 			}
 
 			// 이미지 저장 밎 multer 라우터 호출, 이미지 경로 반환
+			
 			$.ajax({
-				data:formData,
-				type:"POST",
-				url:"/api/common/upload",
-				cache:false,
-				processData: false, // FormData를 사용할 때 필요
-        		contentType: false, // FormData를 사용할 때 필요
-				success: function(result){
-					if (result.code == 200){
-						// 업로드된 이미지의 경로를 가져옴
+				data: formData,
+				type: "POST",
+				url: "/api/common/upload",
+				cache: false,
+				processData: false,
+				contentType: false,
+				success: function (result) {
+					if (result.code == 200) {
 						$("#profile_img").attr("src", result.data);
+						imgPath = result.data;
 						console.log(result.data);
-						$.ajax({
-							type: "POST",
-							url: "/api/member/modify",
-							headers: {
-								Authorization: `Bearer ${loginUserToken}`
-							},
-							dataType: "json",
-							data: {
-								profile_img_path: $("#profile_img").attr("src"),
-								name: $("#member_name").val(),
-								email: $("#email").val(),
-								telephone: $("#telephone").val()
-							},
-							success: function (result) {
-								if (result.code == 200) {
-									console.log("사용자 정보 수정 성공: ", result);
-								} else if (result.code == 400) {
-									console.log(result.msg)
-								} else {
-									console.log("사용자 정보 수정 실패: " + result.msg);
-								}
-							}
-						})
-					}else {
-						if(result.code == 400){
-							alert(result.msg)
-						}
-						
+					} else if (result.code == 400) {
+						console.log(result.msg)
+					} else {
+						console.log("이미지 업로드 실패: " + result.msg);
 					}
 				},
-				error:function(err){
-					console.log("백엔드 API 호출 에러발생:",err);
+				error: function (err) {
+					console.log("이미지 업로드 에러 발생: ", err);
 				}
 			})
+		});
 
-			
+		// 사용자 정보 수정
+		$("#saveChanges").click(function () {
+			var loginUserToken = localStorage.getItem("userauthtoken");
+			// 이미지 저장 밎 multer 라우터 호출, 이미지 경로 반환
+			$.ajax({
+				type: "POST",
+				url: "/api/member/modify",
+				headers: {
+					Authorization: `Bearer ${loginUserToken}`
+				},
+				dataType: "json",
+				data: {
+					profile_img_path: imgPath,
+					name: $("#member_name").val(),
+					email: $("#email").val(),
+					telephone: $("#telephone").val()
+				},
+				success: function (result) {
+					if (result.code == 200) {
+						console.log("사용자 정보 수정 성공: ", result);
+						alert("사용자 정보 수정 성공");
+						location.href = "/main.html";
+					} else if (result.code == 400) {
+						console.log(result.msg)
+					} else {
+						console.log("사용자 정보 수정 실패: " + result.msg);
+					}
+				},
+				error: function (err) {
+					console.log("백엔드 API 호출 에러 발생: ", err);
+				}
+			})
 		});
 
 		// 비밀번호 수정
@@ -2087,32 +2096,18 @@
 				success: function (result) {
 					if (result.code == 200) {
 						console.log("비밀번호 수정 성공: ", result);
+						alert("비밀번호가 수정되었습니다.");
+						location.href = "/main.html";
 					} else if (result.code == 400) {
 						console.log(result.msg)
 					} else {
 						console.log("비밀번호 수정 실패: " + result.msg);
+						alert(result.msg);
 					}
 				}
 			})
 		});
 
-		$('#uploadForm').submit(function(e) {
-			e.preventDefault();
-			var formData = new FormData(this);
-			$.ajax({
-				url: '/your-upload-route', // 백엔드 라우터 경로
-				type: 'POST',
-				data: formData,
-				processData: false, // processData와 contentType을 false로 설정
-				contentType: false,
-				success: function(response) {
-					console.log('File uploaded successfully');
-				},
-				error: function(err) {
-					console.error('Error uploading file');
-				}
-			});
-		});
 	</script>
 </body>
 
