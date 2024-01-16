@@ -60,6 +60,7 @@ router.post("/login", async (req, res, next) => {
 					email: member.email,
 					name: member.name,
 					telephone: member.telephone,
+					profile_img_path: member.profile_img_path
 				};
 
 				var token = await jwt.sign(memberToken, process.env.JWT_SECRET, {

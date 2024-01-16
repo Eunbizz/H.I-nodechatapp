@@ -2113,6 +2113,25 @@
 			})
 		});
 
+
+		$('#uploadForm').submit(function(e) {
+			e.preventDefault();
+			var formData = new FormData(this);
+			$.ajax({
+				url: '/api/common/upload', // 백엔드 라우터 경로
+				type: 'POST',
+				data: formData,
+				processData: false, // processData와 contentType을 false로 설정
+				contentType: false,
+				success: function(response) {
+					console.log('File uploaded successfully');
+				},
+				error: function(err) {
+					console.error('Error uploading file');
+				}
+			});
+		});
+
 	</script>
 </body>
 
