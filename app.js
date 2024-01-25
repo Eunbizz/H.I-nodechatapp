@@ -3,9 +3,13 @@ var express = require("express");
 var path = require("path");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
+
 require("dotenv").config();
+// CORS 접근 이슈 해결을 위한 cors패키지 참조 
 const cors = require("cors");
 
+
+// routes
 var indexRouter = require("./routes/index");
 var memberAPIRouter = require("./routes/memberAPI");
 var channelRouter = require("./routes/channel");
@@ -13,7 +17,9 @@ var channelAPIRouter = require("./routes/channelAPI");
 var commonAPIRouter = require("./routes/commonAPI");
 var sequelize = require("./models/index.js").sequelize;
 
+
 var app = express();
+
 
 // mysql과 자동연결처리 및 모델기반 물리 테이블 생성처리제공
 sequelize.sync();

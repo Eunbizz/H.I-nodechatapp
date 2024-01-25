@@ -6,20 +6,41 @@ var router = express.Router();
 var bcrypt = require("bcryptjs");
 var AES = require("mysql-aes");
 var db = require("../models/index.js");
+
 var jwt = require("jsonwebtoken");
 
+//사용자 토큰제공여부 체크 미들웨어 참조하기
 var { tokenAuthCheck } = require("./apiMiddleware.js");
 
-// var Member = require('../models/member');
+// 코드성 데이터들 열거형 참조
+var constants = require('../common/enum.js');
 
-// Get all members
-router.get("/all", async (req, res, next) => {
+// 전체조회. 로그인시 발급한 JWT토큰은 HTTP Header영역에 포함되어 전달된다.
+router.get("/all", tokenAuthCheck, async (req, res, next) => {
+
+	var apiResult = {
+		code: "",
+		data: null,
+		msg: "",
+	};
+
 	try {
-		var members = await db.Member.findAll();
-		res.json(members);
+		// 멤버조회
+		var members = await db.Member.findAll({
+			attributes:['member_id','email','name','profile_img_path','telephone'],
+			where:{use_state_code:constants.USE_STATE_CODE_USED}
+		});
+
+		apiResult.code = 200;
+		apiResult.data = members;
+		apiResult.msg = "OK";
+
 	} catch (error) {
-		res.json({ message: "Member not find", error: error });
+		apiResult.code = 500;
+		apiResult.data = {};
+		apiResult.msg = "Failed";
 	}
+	res.json(apiResult);
 });
 
 // 로그인 api

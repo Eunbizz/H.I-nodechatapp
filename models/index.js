@@ -5,7 +5,9 @@ const Sequelize = require('sequelize');
 const env = process.env.NODE_ENV || 'development';
 
 //DB연결 환경설정정보 변경처리//관련정보 수정
+//config.js모듈 파일 기반으로 DB연결정보 가져오기 
 const config = require('../config/config.js')[env];
+
 
 //데이터 베이스 객체
 const db= {};
@@ -21,6 +23,16 @@ db.Sequelize = Sequelize; //Sequelize팩키지에서 제공하는 각종 데이�
 
 //회원모델 모듈파일 참조하고 db속성정의하기
 db.Member = require('./member.js')(sequelize,Sequelize);
+
+// 채팅채널정보 모듈 참조
+db.Channel = require('./channel.js')(sequelize,Sequelize);
+
+// 채널사용자정보 모듈 참조
+db.ChannelMember = require('./channelMember.js')(sequelize,Sequelize);
+
+// 채널메시지정보 모듈 참조
+db.ChannelMsg = require('./message.js')(sequelize,Sequelize);
+
 
 //db객체 외부로 노출하기 
 module.exports = db;

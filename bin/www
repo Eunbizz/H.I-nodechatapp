@@ -8,6 +8,9 @@ var app = require('../app');
 var debug = require('debug')('nodechatapp:server');
 var http = require('http');
 
+// 소켓참조
+const webSocket = require("../socket");
+
 /**
  * Get port from environment and store in Express.
  */
@@ -26,6 +29,11 @@ var server = http.createServer(app);
  */
 
 server.listen(port);
+
+
+webSocket(server);
+
+
 server.on('error', onError);
 server.on('listening', onListening);
 
