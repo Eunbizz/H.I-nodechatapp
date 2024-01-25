@@ -21,11 +21,19 @@ app.set('port', port);
 
 var server = http.createServer(app);
 
+//웹 소켓 모듈 참조
+const webSocket = require('../socket');
+
 /**
  * Listen on provided port, on all network interfaces.
  */
 
 server.listen(port);
+
+
+//웹 소켓 express 서버와 연결처리
+webSocket(server);
+
 server.on('error', onError);
 server.on('listening', onListening);
 
