@@ -7,20 +7,10 @@ var bcrypt = require("bcryptjs");
 var AES = require("mysql-aes");
 var db = require("../models/index.js");
 var jwt = require("jsonwebtoken");
+var enums = require("../common/enums.js");
+var moment = require("moment");
 
 var { tokenAuthCheck } = require("./apiMiddleware.js");
-
-// var Member = require('../models/member');
-
-// Get all members
-router.get("/all", async (req, res, next) => {
-	try {
-		var members = await db.Member.findAll();
-		res.json(members);
-	} catch (error) {
-		res.json({ message: "Member not find", error: error });
-	}
-});
 
 // 로그인 api
 router.post("/login", async (req, res, next) => {
@@ -219,27 +209,45 @@ router.get("/profile", tokenAuthCheck, async (req, res, next) => {
 	res.json(apiResult);
 });
 
-// find member
+// 멤버 정보 조회
 router.post("/find", async (req, res, next) => {
+	apiResult = {
+		code: 400,
+		data: null,
+		msg: "",
+	};
 	const emailData = req.body.email;
 	try {
-		// trim: 문자열의 양 끝에 있는 공백(스페이스, 탭, 줄바꿈)을 제거하는 JavaScript의 문자열 메소드
 		if (!emailData || emailData.trim() === "") {
 			console.log("이메일을 입력해주세요");
 			return res.status(400).json({ message: "이메일을 입력해주세요" });
 		}
 
-		const findEmail = await db.Member.findOne({ where: { email: emailData } });
+		var member = await db.Member.findOne({ where: { email: emailData } });
 
-		if (findEmail) {
-			res.json({ message: "Member found", member: findEmail });
+		if (member) {
+			if (member.use_state_code == enums.USE_STATE_CODE.ONLINE) {
+				member.use_state_code = "online";
+			} else if(member.use_state_code == enums.USE_STATE_CODE.OFFLINE) {
+				member.use_state_code = "offline";
+			} else if(member.use_state_code == enums.USE_STATE_CODE.BUSY) {
+				member.use_state_code = "busy";
+			}
+
+			apiResult.code = 200;
+			apiResult.data = member;
+			apiResult.msg = "ok";
 		} else {
-			res.json({ message: "Member not found" });
+			apiResult.code = 400;
+			apiResult.data = null;
+			apiResult.msg = "Not found";
 		}
 	} catch (error) {
-		console.log(error);
-		res.status(500).json({ message: "Member not found", error: error });
+		apiResult.code = 500;
+		apiResult.data = null;
+		apiResult.msg = error.message;
 	}
+	res.json(apiResult);
 });
 
 // Modify an existing member
@@ -348,6 +356,133 @@ router.post("/password/update", tokenAuthCheck, async (req, res) => {
 		apiResult.code = 500;
 		apiResult.data = null;
 		apiResult.msg = error.message;
+	}
+	res.json(apiResult);
+});
+
+// 모든 친구 정보 조회
+router.get('/contacts-list', async(req, res, next) =>{
+	apiResult = {
+		code: 400,
+		data: null,
+		msg: "",
+	};
+
+	try{
+		var token = req.headers.authorization.split("Bearer ")[1];
+		var tokenJsonData = await jwt.verify(token, process.env.JWT_SECRET);
+
+		var friendships = await db.Friendship.findAll({
+			where: {
+				[db.Sequelize.Op.or]: [
+					{ member_id_1: tokenJsonData.member_id },
+					{ member_id_2: tokenJsonData.member_id },
+				],
+			},
+		});
+
+		if (friendships.length == 0) {
+			apiResult.code = 200;
+			apiResult.data = [];
+			apiResult.msg = "ok";
+			res.json(apiResult);
+			return;
+		}
+
+		var memberIds = [];
+		for (var friendship of friendships) {
+			if (friendship.member_id_1 == tokenJsonData.member_id) {
+				memberIds.push(friendship.member_id_2);
+			} else {
+				memberIds.push(friendship.member_id_1);
+			}
+		}
+
+		var members = await db.Member.findAll({
+			attributes: [
+				"member_id",
+				"email",
+				"name",
+				"use_state_code",
+				"profile_img_path",
+				"telephone",
+			],
+			// where member_id is memberIds
+			where: {
+				member_id: {
+					[db.Sequelize.Op.in]: memberIds,
+				},
+			},
+		});
+		for (var member of members){
+			if (member.use_state_code == enums.USE_STATE_CODE.ONLINE) {
+				member.use_state_code = "online";
+			} else if(member.use_state_code == enums.USE_STATE_CODE.OFFLINE) {
+				member.use_state_code = "offline";
+			} else if(member.use_state_code == enums.USE_STATE_CODE.BUSY) {
+				member.use_state_code = "busy";
+			}
+		}
+
+		apiResult.code = 200;
+		apiResult.data = members;
+		apiResult.msg = "ok";
+	}catch(error){
+		apiResult.code = 500;
+		apiResult.data = null;
+		apiResult.msg = "Failed";
+	}
+	res.json(apiResult);
+});
+
+// 친구 추가
+router.post("/add-friend", tokenAuthCheck, async (req, res, next) => {
+	apiResult = {
+		code: 400,
+		data: null,
+		msg: "",
+	};
+
+	try{
+		var token = req.headers.authorization.split("Bearer ")[1];
+		var tokenJsonData = await jwt.verify(token, process.env.JWT_SECRET);
+
+		var member_id_1 = parseInt(tokenJsonData.member_id);
+		var member_id_2 = parseInt(req.body.member_id);
+
+		if (member_id_2 < member_id_1) {
+			var temp = member_id_1;
+			member_id_1 = member_id_2;
+			member_id_2 = temp;
+		}
+
+		var friendship = await db.Friendship.findOne({
+			where: {
+				member_id_1: member_id_1,
+				member_id_2: member_id_2,
+			},
+		});
+
+		if (friendship == null) {
+			var friendship = await db.Friendship.create({
+				member_id_1: member_id_1,
+				member_id_2: member_id_2,
+				status: 1,
+				create_date: moment(Date.now()).format("YYYY-MM-DD HH:mm:ss"),
+			});
+
+			apiResult.code = 200;
+			apiResult.data = friendship;
+			apiResult.msg = "ok";
+		} else {
+			apiResult.code = 400;
+			apiResult.data = null;
+			apiResult.msg = "이미 친구 추가된 상태입니다.";
+		}
+	}catch(error){
+		apiResult.code = 500;
+		apiResult.data = null;
+		apiResult.msg = "Failed";
 	}
 	res.json(apiResult);
 });
