@@ -21,7 +21,8 @@ db.Sequelize = Sequelize; //Sequelize팩키지에서 제공하는 각종 데이�
 //회원모델 모듈파일 참조하고 db속성정의하기
 db.Member = require('./member.js')(sequelize,Sequelize);
 db.Channel = require('./channel.js')(sequelize,Sequelize);
-db.ChannelMessage = require('./channelmessage.js')(sequelize,Sequelize);
+db.ChannelMessage = require('./channelMessage.js')(sequelize,Sequelize);
+db.ChannelMember = require('./channelMember.js')(sequelize,Sequelize);
 db.Friendship = require('./friendship.js')(sequelize,Sequelize);
 
 //db객체 외부로 노출하기 

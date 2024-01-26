@@ -49,6 +49,7 @@ router.post("/login", async (req, res, next) => {
 					email: member.email,
 					name: member.name,
 					telephone: member.telephone,
+					profile_img_path: member.profile_img_path,
 				};
 
 				var token = await jwt.sign(memberToken, process.env.JWT_SECRET, {
@@ -185,6 +186,7 @@ router.get("/profile", tokenAuthCheck, async (req, res, next) => {
 			where: { member_id: loginMemberId },
 			// 토큰안에 정보가 없으면 db에서 가져온다.
 			attributes: [
+				"member_id",
 				"email",
 				"name",
 				"profile_img_path",

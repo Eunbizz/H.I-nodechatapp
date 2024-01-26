@@ -80,7 +80,8 @@ function fnGetFriendList() {
 		success: function (result) {
 			if (result.code == 200) {
 				var user = result.data;
-				var myTag = `<li onClick="fnChatEntry(${user.member_id}, '${user.name}', 1)">
+                // 파라미터: member_id, name, channel_type, channel_limit
+				var myTag = `<li onClick="fnChatEntry(${user.member_id}, '${user.name}', 1, 1)">
                 <a href="#">
                     <div class="contacts-avatar">
                         <span class="status online"></span>
@@ -123,7 +124,14 @@ function fnGetFriendList() {
 			console.log("모든 사용자 정보 호출 결과: ", result);
 			if (result.code == 200) {
 				$.each(result.data, function (index, user) {
-					var userTag = `<li onClick="fnChatEntry(${user.member_id}, '${user.name}', 1)">
+                    // user는 조회된 단일 친구 정보
+                    // contact list에서 클릭된 경우에는 1대1 채팅방만을 생성
+                    var channelData = {
+                        channel_type: 1,
+                        channel_limit: 2,
+                    }
+                    // 파라미터: member_id, name, channel_type, channel_limit
+					var userTag = `<li onClick="fnChatEntry(${user.member_id}, '${user.name}', 1, 1)">
                     <a href="#">
                         <div class="contacts-avatar">
                             <span class="status ${user.use_state_code}"></span>
