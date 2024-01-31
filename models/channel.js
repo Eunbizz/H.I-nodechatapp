@@ -1,4 +1,3 @@
-
 module.exports = function(sequelize, DataTypes) {
     return sequelize.define('channel',{
         channel_id:{
@@ -11,12 +10,12 @@ module.exports = function(sequelize, DataTypes) {
         community_id:{
             type: DataTypes.INTEGER,
             allowNull: false,
-            comment: '커뮤니티id',
+            comment: '소속커뮤니티id',
             },
         category_code: {
             type: DataTypes.INTEGER,
             allowNull: false,
-            comment: '카테고리코드 1:공지 2:잡담',
+            comment: '채널분류코드 1:일대일 2:그룹',
             },
         channel_name: {
             type: DataTypes.STRING(100),
@@ -25,13 +24,13 @@ module.exports = function(sequelize, DataTypes) {
             },
         user_limit: {
             type: DataTypes.INTEGER,
-            allowNull: true,
+            allowNull: false,
             comment: '최대접속자수',
             },
         channel_img_path: {
-            type: DataTypes.STRING(200),
+            type: DataTypes.STRING(300),
             allowNull: true,
-            comment: '채널이미지경로',
+            comment: '채널 대표 이미지 경로',
             },
         channel_desc: {
             type: DataTypes.STRING(1000),
@@ -45,7 +44,7 @@ module.exports = function(sequelize, DataTypes) {
             },
         reg_date: {
             type: DataTypes.DATE,
-            allowNull: false,
+            allowNull: true,
             comment: '등록일시',
             },
         reg_member_id: {
@@ -68,7 +67,7 @@ module.exports = function(sequelize, DataTypes) {
         sequelize,
         tableName: 'channel',  // 기본 테이블명 옵션 복수형이 아닌 여기 지정한 테이블명으로 생성
         timestamps: false,
-        comment: '채널정보테이블',
+        comment: '채팅채널정보',
         indexes: [
             {
                 name: 'PRIMARY',

@@ -373,4 +373,33 @@ router.get('/all', async(req, res, next) =>{
    res.json(apiResult);
 });
 
+
+router.post('/searchEmail', async(req, res, next) =>{
+   apiResult = {
+      code: 400,
+      data: null,
+      msg: "",
+   };
+
+   try{
+      var email = req.body.userEmail;
+
+      var member = await db.Member.findOne({
+         attributes: [
+            "member_id",
+            "profile_img_path"
+         ],
+         where: { email: email },
+      });
+      apiResult.code = 200;
+      apiResult.data = member;
+      apiResult.msg = "ok";
+   }catch(error){
+      apiResult.code = 500;
+      apiResult.data = null;
+      apiResult.msg = error.message;
+   }
+   res.json(apiResult);
+});
+
 module.exports = router;

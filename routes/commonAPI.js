@@ -57,6 +57,38 @@ router.post('/upload', simpleUpload.single('file'), async(req,res)=>{
     res.json(apiResult)
 }) 
 
+// 그룹 이미지 업로드 API
+router.post('/upload/channel', simpleUpload.single('file'), async(req,res)=>{
+  var apiResult = {
+      code: 400,
+      data: null,
+      msg: "",
+   };
+  try{
+      // 파일이 입력되지 않았을 경우
+      if (!req.file){
+          apiResult.code = 400;
+          apiResult.data = null;
+          apiResult.msg = "파일이 제대로 업로드되지 않았습니다.";
+      }
+
+      // 업로드된 파일 정보 추출
+      const uploadFile = req.file;
+      const filePath = "upload/channel/"+uploadFile.filename;
+
+      apiResult.code = 200;
+      apiResult.data = filePath;
+      apiResult.msg = "파일 업로드 성공";
+
+  }catch(err){
+      apiResult.code = 500;
+      apiResult.data = null;
+      apiResult.msg = "서버 에러";
+  }
+  res.json(apiResult)
+}) 
+
+
 
 
 module.exports = router;

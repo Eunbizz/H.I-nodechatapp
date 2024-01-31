@@ -705,81 +705,6 @@
 										</div>
 									</a>
 								</li>
-								<li>
-									<a href="#">
-										<div class="group-avatar">
-											<img src="img/group5.svg" alt="Group Image">
-										</div>
-										<h5 class="text-truncate">Rule Breakers</h5>
-										<div class="stacked-images">
-											<img src="img/user21.png" alt="Group Image">
-											<img src="img/user20.png" alt="Group Image">
-											<img src="img/user15.png" alt="Group Image">
-											<img src="img/user16.png" alt="Group Image">
-											<img src="img/user17.png" alt="Group Image">
-											<img src="img/user18.png" alt="Group Image">
-											<img src="img/user13.png" alt="Group Image">
-											<img src="img/user22.png" alt="Group Image">
-											<span class="plus">+7</span>
-										</div>
-										<div class="group-chat-actions">
-											<button class="edit-group" data-toggle="modal" data-target="#editGroup">
-												<img src="img/edit.svg" alt="Edit Group" />
-											</button>
-											<button class="delete-group">
-												<img src="img/delete.svg" alt="Delete Group" />
-											</button>
-										</div>
-									</a>
-								</li>
-								<li>
-									<a href="#">
-										<div class="group-avatar">
-											<img src="img/group3.svg" alt="Group Image">
-										</div>
-										<h5 class="text-truncate">Creative Minds</h5>
-										<div class="stacked-images">
-											<img src="img/user7.png" alt="Group Image">
-											<img src="img/user2.png" alt="Group Image">
-											<img src="img/user5.png" alt="Group Image">
-											<img src="img/user12.png" alt="Group Image">
-											<img src="img/user19.png" alt="Group Image">
-											<img src="img/user6.png" alt="Group Image">
-										</div>
-										<div class="group-chat-actions">
-											<button class="edit-group" data-toggle="modal" data-target="#editGroup">
-												<img src="img/edit.svg" alt="Edit Group" />
-											</button>
-											<button class="delete-group">
-												<img src="img/delete.svg" alt="Delete Group" />
-											</button>
-										</div>
-									</a>
-								</li>
-								<li>
-									<a href="#">
-										<div class="group-avatar">
-											<img src="img/group7.svg" alt="Group Image">
-										</div>
-										<h5 class="text-truncate">Avengers</h5>
-										<div class="stacked-images">
-											<img src="img/user14.png" alt="Group Image">
-											<img src="img/user18.png" alt="Group Image">
-											<img src="img/user7.png" alt="Group Image">
-											<img src="img/user9.png" alt="Group Image">
-											<img src="img/user20.png" alt="Group Image">
-											<img src="img/user19.png" alt="Group Image">
-										</div>
-										<div class="group-chat-actions">
-											<button class="edit-group" data-toggle="modal" data-target="#editGroup">
-												<img src="img/edit.svg" alt="Edit Group" />
-											</button>
-											<button class="delete-group">
-												<img src="img/delete.svg" alt="Delete Group" />
-											</button>
-										</div>
-									</a>
-								</li>
 							</ul>
 						</div>
 						<!-- Group chat list end -->
@@ -1202,6 +1127,7 @@
 								</div>
 								<div class="field-wrapper">
 									<div class="custom-file">
+										<!-- /////////////// -->
 										<input type="file" class="custom-file-input" id="uploadProfile">
 										<label class="custom-file-label" for="uploadProfile">Group image</label>
 									</div>
@@ -1210,45 +1136,21 @@
 							<!-- Upload profile end -->
 
 							<div class="field-wrapper">
-								<input type="text" placeholder="Enter Group Name">
+								<input type="text" id="groupName" placeholder="Enter Group Name">
 								<div class="field-placeholder">Group Name</div>
 							</div>
 
 							<div class="field-wrapper-group">
 								<div class="field-wrapper">
-									<input type="email" placeholder="Enter Email ID">
+									<input type="email" name="userEmail" id="userEmail" placeholder="Enter Email ID">
 									<div class="field-placeholder">Add User</div>
 								</div>
-								<button class="btn btn-secondary">Add</button>
+								<button class="btn btn-secondary" id="btnAdd">Add</button>
 							</div>
 
-							<div class="stacked-users-group">
+							<div class="stacked-users-group" id="stackedUsersGroup">
 								<div class="stacked-user">
 									<img src="img/user21.png" alt="User" />
-									<span class="delete-user">
-										<img src="img/close.svg" alt="Remove User" />
-									</span>
-								</div>
-								<div class="stacked-user">
-									<img src="img/user15.png" alt="User" />
-									<span class="delete-user">
-										<img src="img/close.svg" alt="Remove User" />
-									</span>
-								</div>
-								<div class="stacked-user">
-									<img src="img/user6.png" alt="User" />
-									<span class="delete-user">
-										<img src="img/close.svg" alt="Remove User" />
-									</span>
-								</div>
-								<div class="stacked-user">
-									<img src="img/user24.png" alt="User" />
-									<span class="delete-user">
-										<img src="img/close.svg" alt="Remove User" />
-									</span>
-								</div>
-								<div class="stacked-user">
-									<img src="img/user13.png" alt="User" />
 									<span class="delete-user">
 										<img src="img/close.svg" alt="Remove User" />
 									</span>
@@ -1256,7 +1158,7 @@
 							</div>
 
 							<div class="mt-3">
-								<button class="btn btn-primary btn-block">Create Group</button>
+								<button class="btn btn-primary btn-block" id="btnCreate">Create Group</button>
 							</div>
 						</div>
 					</div>
@@ -1290,13 +1192,13 @@
 							<!-- Upload profile end -->
 
 							<div class="field-wrapper">
-								<input type="text" value="Avengers">
+								<input type="text" id="groupName" value="Avengers">
 								<div class="field-placeholder">Edit Group Name</div>
 							</div>
 
 							<div class="field-wrapper-group">
 								<div class="field-wrapper">
-									<input type="email" placeholder="Enter Email ID">
+									<input type="email"  placeholder="Enter Email ID">
 									<div class="field-placeholder">Add User</div>
 								</div>
 								<button class="btn btn-primary">Add</button>
@@ -1435,6 +1337,13 @@
 
 		// 현재 접속중인 채널정보
 		var currentChannel = {};
+
+		// 채널 정보 등록을 위한 채널 정보 객체
+		var channelData = {
+        channelName: "",
+        channelImgPath: "",
+        memberList: [],
+      	};
 
 		// 환경설정 아이콘 클릭시 백엔드에서 프로필 정보 조회 바인딩하기
 		var imgPath = ""

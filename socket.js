@@ -142,22 +142,17 @@ module.exports = (server) =>{
             }
         )
 
-        // 채팅방별 메시지 수발신 처리
-        socket.on("channelMsg", async(channelId, memberId, nickName, profile, message)=>{
+        //채팅방별 메시지 수발신 처리 
+        socket.on("channelMsg",async(channelId,memberId,nickName,profile,message)=>{
             var sendDate = moment(Date.now()).format('HH:mm');
-            // 해당 채널에 나를 포함한 모든 사용자에게 메시지 보내기
-            io.to(channelId).emit("receiveChannelMsg", nickName, profile, message, sendDate);
 
-            // 채팅 이력 로그 기록하기
-            await ChattingMsgLogging(channelId,memberId,nickName,2,message)
+            //해당 채널의 모든 사용자들에게 메시지 발송하기 
+            io.to(channelId).emit("receiveChannelMsg",nickName,profile,message,sendDate);
+
+            //채팅 이력 로그 기록 하기 
+            await ChattingMsgLogging(channelId,memberId,nickName,2,message);
         });
 
-        // 클라이언트에서 broadcast 이벤트를 호출하고 데이터를 전달하면
-        // 서버에서는 receiveAll 이벤트를 발생시키고 모든 클라이언트에게 데이터를 전달
-        socket.on("broadcast", function(msg){
-            // io.emit()는 소켓과 연결된 모든 사용자에게 메시지를 전달
-            io.emit("receiveAll", msg);
-        })
 
         // 채팅 이력 정보 기록 처리 함수
         async function ChattingMsgLogging(channelId,memberId,nickName,msgTypeCode,msg){
