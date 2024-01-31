@@ -1333,7 +1333,7 @@
 		console.log("현재 로그인 사용자 정보: ", currentUser);
 
 		// 원격지 SOCKET 서버에 연결하고 socket 클라이언트 객체 생성
-		var socket = io.connect('http://localhost:3000/');
+		var socket = io.connect('/');
 
 		// 현재 접속중인 채널정보
 		var currentChannel = {};
