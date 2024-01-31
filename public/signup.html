@@ -48,7 +48,7 @@
 						<div class="about-desc">
 							Quick Chat is an intelligent and communications tool, built for teams. It provides an integrated platform that makes team communication easy and efficient.
 						</div>
-						<a href="index.html" class="know-more">Know More <img src="img/right-arrow.svg"></a>
+						<a href="/" class="know-more">Know More <img src="img/right-arrow.svg"></a>
 
 					</div>
 				</div>
@@ -57,7 +57,7 @@
 						<form id="entryForm">
 							<div class="login-screen">
 								<div class="login-body">
-									<a href="index.html" class="login-logo">
+									<a href="/" class="login-logo">
 										<img src="img/logo.svg" alt="Quick Chat">
 									</a>
 									<h6>Welcome to Quick Chat App,<br>Create your account.</h6>
@@ -88,7 +88,7 @@
 									</div>
 								</div>
 								<div class="login-footer">
-									<span class="additional-link">Have an account? <a href="login.html" class="btn btn-secondary">Login</a></span>
+									<span class="additional-link">Have an account? <a href="/" class="btn btn-secondary">Login</a></span>
 								</div>
 							</div>
 						</form>
@@ -145,10 +145,10 @@
 				};
 
 				$.post('/api/member/entry', member).done(function(result) {
-					// code값이 200이면 회원가입 완료 후 login.html 페이지로 이동
+					// code값이 200이면 회원가입 완료 후 / 페이지로 이동
 					if(result.code == 200) {
 						alert("회원가입완료");
-						location.href="/login.html";
+						location.href="/";
 					//  result.code == 400 이거나 500이면 회원가입 실패
 					} else if(result.code == 400 || result.code == 500 ) {
 						alert("회원가입실패");

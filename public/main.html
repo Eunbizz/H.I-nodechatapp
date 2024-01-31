@@ -80,8 +80,8 @@
 						<img src="img/settings.svg" alt="Settings">
 						<span class="nav-link-text">Settings</span>
 					</a>
-					<a href="login.html" class="nav-link mt-auto">
-						<img src="img/logout.svg" alt="Logout">
+					<a href="/" class="nav-link mt-auto">
+						<img src="img/logout.svg" alt="Logout" id="btnLogout">
 					</a>
 				</div>
 				<!-- Tabs Nav End -->
@@ -642,32 +642,7 @@
 				<div class="chat-container">
 					<div class="chatContainerScroll" id="chatScroll">
 						<ul class="chat-box" id="chatHistory">
-							<li class='chat-left'>
-								<div class='chat-avatar'>
-									<img src="img/user21.png" alt="Quick Chat Admin" />
-									<div class='chat-name'>Kyle</div>
-								</div>
-								<div class="chat-text-wrapper">
-									<div class='chat-text'>
-										<p>Hello, good morning.</p>
-										<div class='chat-hour read'>08:55 <span>&#10003;</span></div>
-									</div>
-								</div>
-							</li>
-							<li class='chat-right'>
-								<div class="chat-text-wrapper">
-									<div class='chat-text'>
-										<p>Hi Kyle<br />
-											Good morning 😃. How are you?</p>
-										<div class='chat-hour read'>08:56 <span>&#10003;</span></div>
-									</div>
-								</div>
-								<div class='chat-avatar'>
-									<img src="img/user24.png" alt="Quick Chat Admin" />
-									<div class='chat-name'>Amy</div>
-								</div>
-							</li>
-							<li class="divider">Feb 18, 2021</li>
+
 						</ul>
 					</div>
 				</div>
@@ -1031,7 +1006,10 @@
 		var socket = io.connect("http://localhost:3000/");
 		var currentChannel = {};
 
-		
+		$("#btnLogout").click(function () {
+			localStorage.removeItem("userauthtoken");
+			window.location.href = "/";
+		});
 
 	</script>
 	<script src="/js/main-chat.js"></script>
