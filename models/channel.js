@@ -16,7 +16,7 @@ module.exports = function(sequelize, DataTypes) {
         category_code: {
             type: DataTypes.INTEGER,
             allowNull: false,
-            comment: '카테고리코드 1:공지 2:잡담',
+            comment: '카테고리코드 1:1대1 2:그룹채팅',
             },
         channel_name: {
             type: DataTypes.STRING(100),

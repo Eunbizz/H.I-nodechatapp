@@ -7,77 +7,19 @@ var db = require("../models/index.js");
 var bcrypt = require("bcryptjs");
 var jwt = require("jsonwebtoken");
 var { tokenAuthCheck } = require("./apiMiddleware.js");
+const path = require("path");
+router.use(express.static(path.join(__dirname, "../public")));
 
-// 로그인 웹페이지 요청 및 응답
 router.get("/", async (req, res) => {
-	res.render("login", { resultMsg: "", email: "", password: "", layout: "authLayout" });
+	res.sendFile("login.html", { root: path.join(__dirname, "../public") });
 });
 
-// 로그인 처리 요청 및 응답, 로그인 완료 후 채팅 페이지 이동
-router.post("/", async (req, res) => {
-	try {
-		// 사용자 입력 정보 추출
-		var email = req.body.email;
-		var member_password = req.body.password;
-
-		// DB 조회
-		var member = await db.Member.findOne({ where: { email: email } });
-
-		var resultMsg = "";
-		if (member == null) {
-			resultMsg = "멤버 정보가 등록되지 않았습니다.";
-		} else {
-			if (member.member_password == member_password) {
-				res.redirect("/chat");
-			} else {
-				resultMsg = "암호가 일치하지 않습니다.";
-			}
-		}
-
-		if (resultMsg !== "") {
-			res.render("login", { resultMsg, email, member_password, layout: "authLayout" });
-		}
-	} catch (err) {
-		res.statusMessage(500).send("Internal Server Error");
-	}
+router.get("/main", async (req, res) => {
+	res.sendFile("main.html", { root: path.join(__dirname, "../public") });
 });
 
-// 회원가입 웹페이지 요청 및 응답
-router.get("/entry", async (req, res) => {
-	res.render("entry.ejs", { resultMsg: "", email: "", password: "", layout: "authLayout" });
-});
-
-// 회원가입 처리 요청 및 응답, 회원가입 완료 후 로그인 페이지 이동
-router.post("/entry", async (req, res) => {
-	try {
-		var email = req.body.email;
-		var name = req.body.name;
-		var member_password = req.body.member_password;
-		var telephone = req.body.telephone;
-		var birth_date = req.body.birth_date;
-		var profile_img_path = req.body.profile_img_path;
-
-		// 단방향 암호
-		var bcryptedPassword = await bcrypt.hash(member_password, 12);
-
-		var member = {
-			email,
-			name,
-			member_password: bcryptedPassword,
-			telephone,
-			birth_date,
-			profile_img_path,
-			entry_type_code: 1,
-			reg_member_id: 1,
-			use_state_code: 1,
-			reg_date: Date.now(),
-		};
-
-		await db.Member.create(member);
-		res.redirect("/?registration=success");
-	} catch (err) {
-		res.status(500).send("Internal Server Error");
-	}
+router.get("/signup", async (req, res) => {
+	res.sendFile("signup.html", { root: path.join(__dirname, "../public") });
 });
 
 router.post("/checkEmail", async (req, res) => {
@@ -104,27 +46,8 @@ router.post("/checkEmail", async (req, res) => {
 	}
 });
 
-// 암호 찾기 웹페이지 요청 및 응답
-router.get("/find", async (req, res) => {
-	res.render("find", { resultMsg: "", email: "", password: "", layout: "authLayout" });
-});
-
-// 암호찾기 처리 요청 및 응답,암호 찾기 완료 후 로그인 페이지 이동
-router.post("/find", async (req, res) => {
-	try {
-		var email = req.body.email;
-
-		var member = await db.Member.findOne({ where: { email: email } });
-		var resultMsg = "";
-		if (member.email == email) {
-			res.render("password-init", { layout: "authLayout", email, resultMsg });
-		} else {
-			resultMsg = "등록되지 않은 이메일입니다.";
-			res.render("find", { resultMsg, email, layout: "authLayout" });
-		}
-	} catch (err) {
-		res.status(500).send("Internal Server Error");
-	}
+router.get("/forgot-password", async (req, res) => {
+	res.sendFile("forgot-password.html", { root: path.join(__dirname, "../public") });
 });
 
 router.get("/password-init", async (req, res) => {
@@ -157,7 +80,7 @@ router.post("/password-init", tokenAuthCheck, async (req, res) => {
 		msg: "",
 	};
 
-	try{
+	try {
 		var token = req.headers.authorization.split("Bearer ")[1];
 		var decoded = jwt.verify(token, process.env.JWT_SECRET);
 		var loginMemberId = decoded.member_id;
@@ -178,7 +101,7 @@ router.post("/password-init", tokenAuthCheck, async (req, res) => {
 			apiResult.data = null;
 			apiResult.msg = "암호가 변경되었습니다.";
 		}
-	}catch(err){
+	} catch (err) {
 		res.status(500).send("Internal Server Error");
 	}
 	res.json(apiResult);
